@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="The Tranquil Heart Kids - Growing Hearts Growing Faith. Islamic stories, activities, and wisdom for children and families.">
+  <title>Home | The Tranquil Heart Kids</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#D9604A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  
+  <!-- CSS: Load allah-names.css BEFORE styles.css -->
+  <link rel="stylesheet" href="css/allah-names.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="home">
+  <div class="page-background">
+    <div class="decoration decoration-blob-1"></div>
+    <div class="decoration decoration-blob-2"></div>
+    <div class="decoration decoration-blob-3"></div>
+  </div>
+
+  <div id="header-placeholder"></div>
+
+  <main class="main-content">
+    <!-- HERO SECTION -->
+   <section class="hero">
+      <div class="hero-decorations">
+        <span class="floating-element">⭐</span>
+        <span class="floating-element">🌙</span>
+        <span class="floating-element">✨</span>
+        <span class="floating-element">🕌</span>
+        <span class="floating-element">📖</span>
+      </div>
+      <div class="container hero-content">
+        <h1 class="hero-title">The Tranquil Heart <span>Kids</span></h1>
+        <p class="hero-tagline">Growing Hearts Growing Faith</p>
+        <p class="hero-description">
+          Discover inspiring Islamic stories, activities, and wisdom for children and families. 
+          Nurture faith, build character, and create beautiful memories together.
+        </p>
+        <div class="hero-actions">
+          <a href="inspire.html" class="btn btn-primary">📖 Inspire</a>
+          <a href="grow.html" class="btn btn-secondary">🌱 Grow</a>
+          <a href="create.html" class="btn btn-outline">✨ Create</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="kids-border"></div>
+
+    <!-- FEATURED INSPIRE -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">📖 Featured Inspire</h2>
+          <p class="section-subtitle">Inspiring tales of prophets, companions, and scholars</p>
+        </div>
+        <div class="inspire-grid" id="featured-inspire"></div>
+        <div style="text-align: center; margin-top: var(--space-xl);">
+          <a href="inspire.html" class="btn btn-primary">View All Inspire →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- INSPIRE CATEGORIES -->
+    <section class="section section-alt">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Browse Inspire Categories</h2>
+          <p class="section-subtitle">Find stories that inspire and educate</p>
+        </div>
+        <div class="categories-grid" id="inspire-categories-grid"></div>
+      </div>
+    </section>
+
+    <!-- FEATURED GROW -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">🌱 Grow & Learn</h2>
+          <p class="section-subtitle">Activities, guidance, and daily inspiration</p>
+        </div>
+        <div class="grow-grid" id="featured-grow"></div>
+        <div style="text-align: center; margin-top: var(--space-xl);">
+          <a href="grow.html" class="btn btn-primary">View All Grow →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- GROW CATEGORIES -->
+    <section class="section section-alt">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Browse Grow Categories</h2>
+          <p class="section-subtitle">Discover activities and learning resources</p>
+        </div>
+        <div class="categories-grid" id="grow-categories-grid"></div>
+      </div>
+    </section>
+
+    <div class="kids-border"></div>
+
+    <!-- FEATURED CREATE -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">✨ Create & Print</h2>
+          <p class="section-subtitle">Printable activities, trackers, and fun resources</p>
+        </div>
+        <div class="create-grid" id="featured-create"></div>
+        <div style="text-align: center; margin-top: var(--space-xl);">
+          <a href="create.html" class="btn btn-primary">View All Printables →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CREATE CATEGORIES -->
+    <section class="section section-alt">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Browse Create Categories</h2>
+          <p class="section-subtitle">Find printables and activities for every occasion</p>
+        </div>
+        <div class="categories-grid" id="create-categories-grid"></div>
+      </div>
+    </section>
+
+    <div class="kids-border"></div>
+
+    <!-- LATEST CONTENT -->
+    <section class="section section-cool">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">🌟 Latest Updates</h2>
+          <p class="section-subtitle">Fresh content across all categories</p>
+        </div>
+        <div class="inspire-grid" id="latest-content"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="footer-placeholder"></div>
+  
+  <!-- ⚠️ CRITICAL: Load scripts WITHOUT defer, in correct order -->
+  <script src="js/allah-names-data.js"></script>
+  <script src="js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</body>
+</html>

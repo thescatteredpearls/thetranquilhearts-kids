@@ -1,0 +1,26 @@
+{
+  "inspire": [
+    { "id": "prophets", "name": "Prophets", "icon": "🌟" },
+    { "id": "seerah", "name": "Seerah", "icon": "🌙" },
+    { "id": "companions", "name": "Companions", "icon": "⭐" },
+    { "id": "scholars", "name": "Scholars", "icon": "🎓" },
+    { "id": "scientists", "name": "Scientists", "icon": "🪐" },
+    { "id": "inspiration", "name": "Inspiration", "icon": "💫" }
+  ],
+  "grow": [
+    { "id": "myprayer", "name": "My Prayer", "icon": "🤲" },
+    { "id": "dailysunnah", "name": "Daily Sunnah", "icon": "🗓️" },
+    { "id": "namesofallah", "name": "Names of Allah", "icon": "👑" },
+    { "id": "rewardscorner", "name": "Rewards Corner", "icon": "🎁" },
+    { "id": "faith", "name": "Faith", "icon": "💫" }
+  ],
+  "create": [
+    { "id": "habit", "name": "Habit", "icon": "📋" },
+    { "id": "activities", "name": "Activities", "icon": "🌈" },
+    { "id": "etiquettes", "name": "Etiquettes", "icon": "⏳" },
+    { "id": "bookmarks", "name": "Bookmarks", "icon": "🔖" },
+    { "id": "reminders", "name": "Reminders", "icon": "🔔" },
+    { "id": "badges", "name": "Badges", "icon": "🏆" },
+    { "id": "general", "name": "General", "icon": "🌸" }
+  ]
+}

@@ -1,0 +1,39 @@
+<header class="header">
+  <div class="container header-content">
+    <a href="index.html" class="logo">
+      <span class="logo-text">The Tranquil Heart <span>Kids</span> </span>
+    </a>
+    <nav class="nav-main">
+      <a href="index.html" class="nav-link" data-page="home">🏠 Home</a>
+      <a href="inspire.html" class="nav-link" data-page="inspire">📖 Inspire</a>
+      <a href="grow.html" class="nav-link" data-page="grow">🌱 Grow</a>
+      <a href="create.html" class="nav-link" data-page="create">✨ Create</a>
+      <a href="bookmarks.html" class="nav-link nav-link-bookmark" data-page="bookmarks">🔖 Bookmarks<span class="bookmark-count" style="display:none">0</span></a>
+    </nav>
+    <div class="header-actions">
+      <button class="action-btn search-toggle" aria-label="Search">🔍</button>
+      <button class="action-btn dark-mode-toggle" aria-label="Toggle dark mode">
+        <span class="icon-moon">🌙</span>
+        <span class="icon-sun">☀️</span>
+      </button>
+      <div class="font-size-toggle">
+        <button class="action-btn" aria-label="Font size">Aa</button>
+        <div class="font-size-dropdown">
+          <button class="font-size-option" data-size="sm">Small</button>
+          <button class="font-size-option active" data-size="md">Medium</button>
+          <button class="font-size-option" data-size="lg">Large</button>
+        </div>
+      </div>
+      <button class="action-btn mobile-menu-toggle" aria-label="Menu">☰</button>
+    </div>
+  </div>
+</header>
+<div class="search-overlay">
+  <div class="search-container">
+    <div class="search-input-wrapper">
+      <input type="text" class="search-input" placeholder="Search stories, activities...">
+      <button class="search-close">×</button>
+    </div>
+    <div class="search-results"></div>
+  </div>
+</div>

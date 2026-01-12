@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Tranquil Heart Kids</title>
+  <link rel="stylesheet" href="css/allah-names.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/download-styles.css">
+  <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+  
+</head>
+<body data-page="detail">
+  <div id="header-placeholder"></div>
+  
+  <main class="main-content">
+    <div id="detail-content"></div>
+    <div id="related-content"></div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+  <script src="js/allah-names-data.js"></script>
+  <script src="js/main.js"></script>
+   <!-- Marked.js for markdown parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+    console.log('🔍 Debug: allahNames loaded?', typeof window.allahNames !== 'undefined');
+    if (window.allahNames) {
+      console.log('✅ allahNames count:', window.allahNames.length);
+    } else {
+      console.error('❌ allahNames NOT loaded!');
+    }
+  </script>
+</body>
+</html>
