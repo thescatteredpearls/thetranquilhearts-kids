@@ -84,7 +84,7 @@ async function loadComponent(name, id) {
   var el = document.getElementById(id);
   if (!el) return;
   try {
-    var res = await fetch('components/' + name + '.html');
+    var res = await fetch('components/' + name + '.html?v=' + Date.now());
     if (res.ok) el.innerHTML = await res.text();
   } catch (e) { console.warn('Could not load ' + name); }
 }
@@ -626,6 +626,11 @@ function renderHomePage() {
   renderSection('featured-inspire', state.inspire.slice(0, 3), createInspireCard);
   renderSection('featured-grow', state.grow.slice(0, 3), createGrowCard);
   renderSection('featured-create', state.create.slice(0, 3), createCreateCard);
+  if (state.categories) {
+    renderCategories('inspire-categories-grid', state.categories.inspire, state.inspire.length, 'inspire');
+    renderCategories('grow-categories-grid', state.categories.grow, state.grow.length, 'grow');
+    renderCategories('create-categories-grid', state.categories.create, state.create.length, 'create');
+  }
 }
 
 function renderSection(id, items, fn) {
@@ -797,10 +802,25 @@ function createGrowCard(item) {
   var url = 'detail.html?id=' + item.id;
   var icon = cat ? cat.icon : '🌱';
   var readingTime = calculateReadingTime(item.content);
-  var imageHtml = item.image 
-    ? '<img src="' + escapeHtml(item.image) + '" alt="' + escapeHtml(item.title) + '" class="grow-card-img" loading="lazy">'
-    : '<div class="grow-card-placeholder"><span>' + icon + '</span></div>';
-  return '<article class="grow-card" data-category="' + escapeHtml(item.category || '') + '">' +
+  var isAllahName = item.category === 'Names of Allah';
+  var imageHtml;
+  var dataAttr = '';
+
+  if (isAllahName) {
+    var allahName = findAllahName(item.title);
+    dataAttr = ' data-allah-name="true"';
+    imageHtml = '<div class="grow-card-placeholder">' +
+      (allahName ? '<span class="allah-name-number">' + allahName.number + '</span>' : '') +
+      '<span class="allah-name-arabic">' + (allahName ? allahName.arabic : '') + '</span>' +
+      '<span class="allah-name-transliteration">' + (allahName ? allahName.transliteration : escapeHtml(item.title)) + '</span>' +
+      '<span class="allah-name-meaning">' + (allahName ? allahName.meaning : '') + '</span>' +
+      '</div>';
+  } else if (item.image) {
+    imageHtml = '<img src="' + escapeHtml(item.image) + '" alt="' + escapeHtml(item.title) + '" class="grow-card-img" loading="lazy">';
+  } else {
+    imageHtml = '<div class="grow-card-placeholder"><span>' + icon + '</span></div>';
+  }
+  return '<article class="grow-card"' + dataAttr + ' data-category="' + escapeHtml(item.category || '') + '">' +
     '<a href="' + url + '" class="grow-card-link">' +
     '<div class="grow-card-image">' + BookmarkSystem.createButton(item.id, 'card') +
     imageHtml + '</div>' +
@@ -936,28 +956,42 @@ function findItemById(id) {
 function renderDetailContent(item, type) {
   var el = document.getElementById('detail-content');
   if (!el) return;
-  
+
   DownloadSystem.currentItem = item;
-  
+
   var cats = type === 'inspire' ? state.categories.inspire : type === 'grow' ? state.categories.grow : state.categories.create;
   var cat = cats ? cats.find(function(c) { return c.name === item.category; }) : null;
   var icon = cat ? cat.icon : '📖';
-  
+
   var processedContent = renderMarkdown(item.content || '');
   if (item.images && item.images.length > 0) {
     processedContent = DownloadSystem.processImagesInContent(processedContent, item.images);
   }
-  
+
   var downloadAllBtn = DownloadSystem.createDownloadAllButton(item.images);
-  
-  // Add featured image if it exists
-  var headerImage = item.image ? '<div class="content-header-image"><img src="' + escapeHtml(item.image) + '" alt="' + escapeHtml(item.title) + '" class="content-featured-image"></div>' : '';
-  
+
+  // Check if this is Names of Allah category
+  var isAllahName = item.category === 'Names of Allah';
+  var headerHtml = '';
+
+  if (isAllahName) {
+    var allahName = findAllahName(item.title);
+    headerHtml = '<div class="allah-name-detail-header">' +
+      (allahName && allahName.number ? '<span class="allah-name-detail-number">' + allahName.number + '</span>' : '') +
+      '<span class="allah-name-detail-arabic">' + (allahName ? allahName.arabic : '') + '</span>' +
+      '<span class="allah-name-detail-transliteration">' + (allahName ? allahName.transliteration : '') + '</span>' +
+      '<span class="allah-name-detail-meaning">' + (allahName ? allahName.meaning : '') + '</span>' +
+      '</div>';
+  } else {
+    // Add featured image if it exists (not for Names of Allah)
+    headerHtml = item.image ? '<div class="content-header-image"><img src="' + escapeHtml(item.image) + '" alt="' + escapeHtml(item.title) + '" class="content-featured-image"></div>' : '';
+  }
+
   el.innerHTML = '<article class="content-detail">' +
-    headerImage +
+    headerHtml +
     '<header class="content-header"><div class="content-meta"><span class="content-category">' + icon + ' ' + escapeHtml(item.category || 'Uncategorized') + '</span>' +
     (item.date ? '<span class="content-date">' + formatDate(item.date) + '</span>' : '') + '</div>' +
-    '<h1 class="content-title">' + escapeHtml(item.title) + '</h1>' +
+    (isAllahName ? '' : '<h1 class="content-title">' + escapeHtml(item.title) + '</h1>') +
     downloadAllBtn +
     '</header>' +
     '<div class="content-body">' + processedContent + '</div>' +
@@ -971,10 +1005,47 @@ function renderRelatedContent(current, type) {
   var el = document.getElementById('related-content');
   if (!el) return;
   var items = type === 'inspire' ? state.inspire : type === 'grow' ? state.grow : state.create;
-  var related = items.filter(function(i) { return i.id !== current.id && i.category === current.category; }).slice(0, 3);
-  if (!related.length) { el.style.display = 'none'; return; }
+
+  // Get items in same category
+  var sameCategory = items.filter(function(i) { return i.category === current.category; });
+  var currentIndex = sameCategory.findIndex(function(i) { return i.id === current.id; });
+
+  // Get previous and next items
+  var prevItem = currentIndex > 0 ? sameCategory[currentIndex - 1] : null;
+  var nextItem = currentIndex < sameCategory.length - 1 ? sameCategory[currentIndex + 1] : null;
+
+  // Build prev/next navigation
+  var navHtml = '';
+  if (prevItem || nextItem) {
+    navHtml = '<div class="prev-next-nav">';
+    if (prevItem) {
+      navHtml += '<a href="detail.html?id=' + prevItem.id + '" class="prev-next-link prev-link">' +
+        '<span class="prev-next-label">← Previous</span>' +
+        '<span class="prev-next-title">' + escapeHtml(prevItem.title) + '</span></a>';
+    } else {
+      navHtml += '<div class="prev-next-link prev-link empty"></div>';
+    }
+    if (nextItem) {
+      navHtml += '<a href="detail.html?id=' + nextItem.id + '" class="prev-next-link next-link">' +
+        '<span class="prev-next-label">Next →</span>' +
+        '<span class="prev-next-title">' + escapeHtml(nextItem.title) + '</span></a>';
+    } else {
+      navHtml += '<div class="prev-next-link next-link empty"></div>';
+    }
+    navHtml += '</div>';
+  }
+
+  // Get related items (excluding current, prev, next)
+  var excludeIds = [current.id];
+  if (prevItem) excludeIds.push(prevItem.id);
+  if (nextItem) excludeIds.push(nextItem.id);
+  var related = sameCategory.filter(function(i) { return excludeIds.indexOf(i.id) === -1; }).slice(0, 3);
+
   var fn = type === 'inspire' ? createInspireCard : type === 'grow' ? createGrowCard : createCreateCard;
-  el.innerHTML = '<h3>Related ' + type.charAt(0).toUpperCase() + type.slice(1) + '</h3><div class="related-grid">' + related.map(fn).join('') + '</div>';
+  var relatedHtml = related.length ? '<h3>More in ' + escapeHtml(current.category) + '</h3><div class="related-grid">' + related.map(fn).join('') + '</div>' : '';
+
+  if (!navHtml && !relatedHtml) { el.style.display = 'none'; return; }
+  el.innerHTML = navHtml + relatedHtml;
 }
 
 function showNotFound() {
@@ -1053,29 +1124,32 @@ function toggleDarkMode() {
 
 // Font Size
 function initFontSize() {
-  var toggleBtn = document.querySelector('.font-size-toggle .action-btn');
-  var dropdown = document.querySelector('.font-size-dropdown');
   var saved = localStorage.getItem('fontSize') || 'md';
   setFontSize(saved);
-  
-  if (toggleBtn && dropdown) {
-    toggleBtn.addEventListener('click', function(e) {
+
+  // Use event delegation for font toggle button
+  document.addEventListener('click', function(e) {
+    var toggleBtn = e.target.closest('.font-size-toggle .action-btn');
+    var dropdown = document.querySelector('.font-size-dropdown');
+
+    if (toggleBtn) {
       e.stopPropagation();
-      dropdown.classList.toggle('open');
-    });
-  }
-  
-  document.querySelectorAll('.font-size-option').forEach(function(opt) {
-    opt.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (dropdown) dropdown.classList.toggle('open');
+      return;
+    }
+
+    var option = e.target.closest('.font-size-option');
+    if (option) {
       e.stopPropagation();
-      var size = opt.dataset.size;
+      var size = option.dataset.size;
       setFontSize(size);
       localStorage.setItem('fontSize', size);
       if (dropdown) dropdown.classList.remove('open');
-    });
-  });
-  
-  document.addEventListener('click', function(e) {
+      return;
+    }
+
+    // Close dropdown when clicking outside
     if (dropdown && !e.target.closest('.font-size-toggle')) {
       dropdown.classList.remove('open');
     }
@@ -1083,8 +1157,8 @@ function initFontSize() {
 }
 
 function setFontSize(size) {
-  document.body.classList.remove('font-size-sm', 'font-size-md', 'font-size-lg');
-  document.body.classList.add('font-size-' + size);
+  document.documentElement.classList.remove('font-size-sm', 'font-size-md', 'font-size-lg');
+  document.documentElement.classList.add('font-size-' + size);
   document.querySelectorAll('.font-size-option').forEach(function(opt) {
     opt.classList.toggle('active', opt.dataset.size === size);
   });
@@ -1280,6 +1354,36 @@ function escapeHtml(t) {
   var d = document.createElement('div');
   d.textContent = t;
   return d.innerHTML;
+}
+
+function findAllahName(title) {
+  if (!title || typeof allahNames === 'undefined') return null;
+  // Extract transliteration and meaning from title like "Ash-Shaheed (The Witness)"
+  var nameMatch = title.match(/^([A-Za-z\-']+)\s*\(([^)]+)\)/);
+  if (!nameMatch) return null;
+
+  var searchName = nameMatch[1].toLowerCase().replace(/-/g, '').replace(/'/g, '');
+  var titleMeaning = nameMatch[2];
+
+  var found = allahNames.find(function(n) {
+    var translit = n.transliteration.toLowerCase().replace(/-/g, '').replace(/'/g, '');
+    // Match if first 4+ chars match (handles shakir/shakur variations)
+    return translit === searchName ||
+           translit.substring(0, 5) === searchName.substring(0, 5) ||
+           translit.includes(searchName) ||
+           searchName.includes(translit);
+  });
+
+  // If found, use it; if not, create a fallback with title info
+  if (found) return found;
+
+  // Fallback: create object from title
+  return {
+    number: '',
+    arabic: '',
+    transliteration: nameMatch[1],
+    meaning: titleMeaning
+  };
 }
 
 //reading time
