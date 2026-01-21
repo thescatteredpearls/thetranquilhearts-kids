@@ -257,8 +257,8 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: 700; lin
 .grow-card[data-category="Daily Sunnah"] { background: #FFF8EC; }
 .grow-card[data-category="Daily Sunnah"] .grow-card-placeholder { background: #FFE8B8; }
 
-.grow-card[data-category="Names of Allah"] { background: #F8F5FC; }
-.grow-card[data-category="Names of Allah"] .grow-card-placeholder { background: #E8DCF5; }
+.grow-card[data-category="Names of Allah"] { background: #F0F8F8; }
+.grow-card[data-category="Names of Allah"] .grow-card-placeholder { background: linear-gradient(135deg, #E8F4F4 0%, #D4E8E8 30%, #E8DDE8 70%, #F0E8E8 100%); }
 
 .grow-card[data-category="Gifts"] { background: #FFF5F3; }
 .grow-card[data-category="Gifts"] .grow-card-placeholder { background: #FCDCD8; }
