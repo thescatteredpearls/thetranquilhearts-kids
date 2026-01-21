@@ -1361,7 +1361,7 @@ function escapeHtml(t) {
 }
 
 function findAllahName(title) {
-  if (!title || typeof allahNames === 'undefined') return null;
+  if (!title || !window.allahNames) return null;
   // Extract transliteration and meaning from title like "Ash-Shaheed (The Witness)"
   var nameMatch = title.match(/^([A-Za-z\-']+)\s*\(([^)]+)\)/);
   if (!nameMatch) return null;
@@ -1369,14 +1369,23 @@ function findAllahName(title) {
   var searchName = nameMatch[1].toLowerCase().replace(/-/g, '').replace(/'/g, '');
   var titleMeaning = nameMatch[2];
 
-  var found = allahNames.find(function(n) {
+  // First try exact match
+  var found = window.allahNames.find(function(n) {
     var translit = n.transliteration.toLowerCase().replace(/-/g, '').replace(/'/g, '');
-    // Match if first 4+ chars match (handles shakir/shakur variations)
-    return translit === searchName ||
-           translit.substring(0, 5) === searchName.substring(0, 5) ||
-           translit.includes(searchName) ||
-           searchName.includes(translit);
+    return translit === searchName;
   });
+
+  // If no exact match, try fuzzy match (but be more careful)
+  if (!found) {
+    found = window.allahNames.find(function(n) {
+      var translit = n.transliteration.toLowerCase().replace(/-/g, '').replace(/'/g, '');
+      // Only match if lengths are similar (within 2 chars) and prefix matches
+      var lenDiff = Math.abs(translit.length - searchName.length);
+      if (lenDiff > 2) return false;
+      // Match if first 6+ chars match (more strict than before)
+      return translit.substring(0, 6) === searchName.substring(0, 6);
+    });
+  }
 
   // If found, use it; if not, create a fallback with title info
   if (found) return found;
