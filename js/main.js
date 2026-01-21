@@ -1362,12 +1362,19 @@ function escapeHtml(t) {
 
 function findAllahName(title) {
   if (!title || !window.allahNames) return null;
-  // Extract transliteration and meaning from title like "Ash-Shaheed (The Witness)"
-  var nameMatch = title.match(/^([A-Za-z\-']+)\s*\(([^)]+)\)/);
-  if (!nameMatch) return null;
 
-  var searchName = nameMatch[1].toLowerCase().replace(/-/g, '').replace(/'/g, '');
-  var titleMeaning = nameMatch[2];
+  var searchName, titleMeaning;
+
+  // Try to extract transliteration and meaning from title like "Ash-Shaheed (The Witness)"
+  var nameMatch = title.match(/^([A-Za-z\-']+)\s*\(([^)]+)\)/);
+  if (nameMatch) {
+    searchName = nameMatch[1].toLowerCase().replace(/-/g, '').replace(/'/g, '');
+    titleMeaning = nameMatch[2];
+  } else {
+    // Handle titles without parentheses like "Allah"
+    searchName = title.trim().toLowerCase().replace(/-/g, '').replace(/'/g, '');
+    titleMeaning = '';
+  }
 
   // First try exact match
   var found = window.allahNames.find(function(n) {
@@ -1394,7 +1401,7 @@ function findAllahName(title) {
   return {
     number: '',
     arabic: '',
-    transliteration: nameMatch[1],
+    transliteration: nameMatch ? nameMatch[1] : title,
     meaning: titleMeaning
   };
 }
