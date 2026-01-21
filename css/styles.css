@@ -260,8 +260,8 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: 700; lin
 .grow-card[data-category="Names of Allah"] { background: #F8F5FC; }
 .grow-card[data-category="Names of Allah"] .grow-card-placeholder { background: #E8DCF5; }
 
-.grow-card[data-category="Rewards Corner"] { background: #FFF5F3; }
-.grow-card[data-category="Rewards Corner"] .grow-card-placeholder { background: #FCDCD8; }
+.grow-card[data-category="Gifts"] { background: #FFF5F3; }
+.grow-card[data-category="Gifts"] .grow-card-placeholder { background: #FCDCD8; }
 
 .grow-card[data-category="Faith"] { background: #F0F5FA; }
 .grow-card[data-category="Faith"] .grow-card-placeholder { background: #D0E0EC; }
@@ -296,6 +296,33 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: 700; lin
   background: var(--card-bg, #f5f5f5);
   min-height: 200px;
 }
+
+/* Styled Grow Category Cards */
+.grow-card-placeholder.grow-category-styled {
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.grow-category-icon { font-size: 3rem; z-index: 2; }
+.grow-category-name { font-size: 1.1rem; font-weight: 700; z-index: 2; text-align: center; }
+
+/* My Prayer - Blue */
+.grow-card[data-grow-category="myprayer"] .grow-category-styled { background: #E3F2FD; }
+.grow-card[data-grow-category="myprayer"] .grow-category-name { color: #1565C0; }
+
+/* Daily Sunnah - Green */
+.grow-card[data-grow-category="dailysunnah"] .grow-category-styled { background: #E8F5E9; }
+.grow-card[data-grow-category="dailysunnah"] .grow-category-name { color: #2E7D32; }
+
+/* Gifts - Orange/Gold */
+.grow-card[data-grow-category="gifts"] .grow-category-styled { background: #FFF8E1; }
+.grow-card[data-grow-category="gifts"] .grow-category-name { color: #F57F17; }
+
+/* Faith - Teal */
+.grow-card[data-grow-category="faith"] .grow-category-styled { background: #E0F2F1; }
+.grow-card[data-grow-category="faith"] .grow-category-name { color: #00695C; }
 
 .inspire-card-placeholder span,
 .grow-card-placeholder span,

@@ -803,14 +803,15 @@ function createGrowCard(item) {
   var icon = cat ? cat.icon : '🌱';
   var readingTime = calculateReadingTime(item.content);
   var isAllahName = item.category === 'Names of Allah';
+  var categoryId = cat ? cat.id : '';
   var imageHtml;
-  var dataAttr = '';
+  var dataAttr = ' data-grow-category="' + categoryId + '"';
 
   if (isAllahName) {
     var allahName = findAllahName(item.title);
-    dataAttr = ' data-allah-name="true"';
+    dataAttr += ' data-allah-name="true"';
     imageHtml = '<div class="grow-card-placeholder">' +
-      (allahName ? '<span class="allah-name-number">' + allahName.number + '</span>' : '') +
+      (allahName && allahName.number ? '<span class="allah-name-number">' + allahName.number + '</span>' : '') +
       '<span class="allah-name-arabic">' + (allahName ? allahName.arabic : '') + '</span>' +
       '<span class="allah-name-transliteration">' + (allahName ? allahName.transliteration : escapeHtml(item.title)) + '</span>' +
       '<span class="allah-name-meaning">' + (allahName ? allahName.meaning : '') + '</span>' +
@@ -818,7 +819,10 @@ function createGrowCard(item) {
   } else if (item.image) {
     imageHtml = '<img src="' + escapeHtml(item.image) + '" alt="' + escapeHtml(item.title) + '" class="grow-card-img" loading="lazy">';
   } else {
-    imageHtml = '<div class="grow-card-placeholder"><span>' + icon + '</span></div>';
+    imageHtml = '<div class="grow-card-placeholder grow-category-styled">' +
+      '<span class="grow-category-icon">' + icon + '</span>' +
+      '<span class="grow-category-name">' + escapeHtml(item.category || 'Grow') + '</span>' +
+      '</div>';
   }
   return '<article class="grow-card"' + dataAttr + ' data-category="' + escapeHtml(item.category || '') + '">' +
     '<a href="' + url + '" class="grow-card-link">' +
