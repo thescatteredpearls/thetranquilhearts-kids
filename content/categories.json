@@ -11,6 +11,7 @@
     { "id": "myprayer", "name": "My Prayer", "icon": "🤲" },
     { "id": "dailysunnah", "name": "Daily Sunnah", "icon": "🗓️" },
     { "id": "namesofallah", "name": "Names of Allah", "icon": "👑" },
+    { "id": "adhkar", "name": "Adhkar", "icon": "🗓️" },
     { "id": "gifts", "name": "Gifts", "icon": "🎁" },
     { "id": "faith", "name": "Faith", "icon": "💫" }
   ],

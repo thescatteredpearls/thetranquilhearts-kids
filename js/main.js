@@ -78,6 +78,39 @@ function initializeFeatures() {
 async function loadComponents() {
   await loadComponent('header', 'header-placeholder');
   await loadComponent('footer', 'footer-placeholder');
+  populateSiteConfig();
+}
+
+// Populate site config values into DOM elements with data attributes
+function populateSiteConfig() {
+  if (!window.SITE_CONFIG) return;
+  var config = window.SITE_CONFIG;
+
+  // Site name (text only)
+  document.querySelectorAll('[data-site-name]').forEach(function(el) {
+    el.textContent = config.name;
+  });
+
+  // Site name with HTML (for logo with span)
+  document.querySelectorAll('[data-site-name-html]').forEach(function(el) {
+    el.innerHTML = config.nameHtml;
+  });
+
+  // Tagline
+  document.querySelectorAll('[data-site-tagline]').forEach(function(el) {
+    el.textContent = config.tagline;
+  });
+
+  // Email
+  document.querySelectorAll('[data-site-email]').forEach(function(el) {
+    el.textContent = config.email;
+    el.href = 'mailto:' + config.email;
+  });
+
+  // Copyright
+  document.querySelectorAll('[data-site-copyright]').forEach(function(el) {
+    el.textContent = config.year + ' ' + config.name + '. All rights reserved.';
+  });
 }
 
 async function loadComponent(name, id) {
@@ -631,6 +664,36 @@ function renderHomePage() {
     renderCategories('grow-categories-grid', state.categories.grow, state.grow.length, 'grow');
     renderCategories('create-categories-grid', state.categories.create, state.create.length, 'create');
   }
+  // Render latest content from all sections
+  renderLatestContent();
+}
+
+function renderLatestContent() {
+  var el = document.getElementById('latest-content');
+  if (!el) return;
+
+  // Combine all content with their type
+  var allContent = [];
+  state.inspire.forEach(function(item) { allContent.push({ item: item, type: 'inspire' }); });
+  state.grow.forEach(function(item) { allContent.push({ item: item, type: 'grow' }); });
+  state.create.forEach(function(item) { allContent.push({ item: item, type: 'create' }); });
+
+  // Sort by date (newest first)
+  allContent.sort(function(a, b) {
+    return new Date(b.item.date || 0) - new Date(a.item.date || 0);
+  });
+
+  // Take the latest 6 items
+  var latest = allContent.slice(0, 6);
+
+  // Render with appropriate card function
+  var html = latest.map(function(entry) {
+    if (entry.type === 'inspire') return createInspireCard(entry.item);
+    if (entry.type === 'grow') return createGrowCard(entry.item);
+    return createCreateCard(entry.item);
+  }).join('');
+
+  el.innerHTML = html;
 }
 
 function renderSection(id, items, fn) {
@@ -661,7 +724,7 @@ function renderDetailPage() {
   if (!id) return showNotFound();
   var result = findItemById(id);
   if (!result.item) return showNotFound();
-  document.title = result.item.title + ' | The Tranquil Heart Kids';
+  document.title = result.item.title + ' | ' + (window.SITE_CONFIG ? window.SITE_CONFIG.name : 'The Tranquil Heart Kids');
   renderDetailContent(result.item, result.contentType);
   renderRelatedContent(result.item, result.contentType);
 }
@@ -691,9 +754,18 @@ function renderCategories(id, cats, total, type) {
   if (!el) return;
   var names = { inspire: 'Inspire', grow: 'Grow', create: 'Create' };
   var icons = { inspire: '📚', grow: '🌱', create: '✨' };
+  var isHomePage = id.endsWith('-grid'); // Home page uses -grid, listing pages use -container
   var all = [{ id: 'all', name: 'All ' + names[type], icon: icons[type], count: total }].concat(cats || []);
+
   el.innerHTML = all.map(function(c) {
-    return '<button class="category-btn ' + (state.currentFilter === c.id ? 'active' : '') + '" data-category="' + c.id + '" onclick="filter' + type.charAt(0).toUpperCase() + type.slice(1) + '(\'' + c.id + '\')"><span class="category-icon">' + c.icon + '</span><span class="category-name">' + c.name + '</span><span class="category-count">' + c.count + '</span></button>';
+    if (isHomePage) {
+      // On home page, render as links that navigate to the listing page
+      var href = type + '.html' + (c.id === 'all' ? '' : '?category=' + c.id);
+      return '<a href="' + href + '" class="category-btn"><span class="category-icon">' + c.icon + '</span><span class="category-name">' + c.name + '</span><span class="category-count">' + c.count + '</span></a>';
+    } else {
+      // On listing pages, render as filter buttons
+      return '<button class="category-btn ' + (state.currentFilter === c.id ? 'active' : '') + '" data-category="' + c.id + '" onclick="filter' + type.charAt(0).toUpperCase() + type.slice(1) + '(\'' + c.id + '\')"><span class="category-icon">' + c.icon + '</span><span class="category-name">' + c.name + '</span><span class="category-count">' + c.count + '</span></button>';
+    }
   }).join('');
 }
 
