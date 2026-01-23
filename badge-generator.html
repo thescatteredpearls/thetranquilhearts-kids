@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Allah Names Badge Generator - The Tranquil Heart Kids</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      color: #fff;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #ffd700;
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 30px;
+    }
+
+    .controls {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .controls label {
+      color: #ffd700;
+      font-weight: 500;
+    }
+
+    .controls select,
+    .controls input,
+    .controls button {
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+    }
+
+    .controls select {
+      background: #fff;
+      min-width: 200px;
+    }
+
+    .controls button {
+      background: linear-gradient(135deg, #ffd700, #ffaa00);
+      color: #1a1a2e;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .controls button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+    }
+
+    .controls button.secondary {
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      color: #fff;
+    }
+
+    .preview-section {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .preview-section h2 {
+      color: #ffd700;
+      margin-bottom: 20px;
+    }
+
+    #preview-canvas {
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      max-width: 100%;
+    }
+
+    .badge-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .badge-item {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+
+    .badge-item:hover {
+      transform: scale(1.02);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .badge-item canvas {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+
+    .badge-item .badge-info {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .badge-item .badge-number {
+      color: #ffd700;
+      font-weight: 600;
+    }
+
+    .badge-item button {
+      margin-top: 10px;
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #ffd700, #ffaa00);
+      border: none;
+      border-radius: 6px;
+      color: #1a1a2e;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 20px 0;
+      display: none;
+    }
+
+    .progress-bar.active {
+      display: block;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ffd700, #ffaa00);
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    .progress-text {
+      text-align: center;
+      color: #aaa;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    /* Hidden canvas for generation */
+    #hidden-canvas {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .controls {
+        flex-direction: column;
+      }
+
+      .controls select,
+      .controls button {
+        width: 100%;
+      }
+    }
+  </style>
+  <!-- Arabic Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <h1>99 Names of Allah - Badge Generator</h1>
+    <p class="subtitle">Generate beautiful badges for each of Allah's beautiful names</p>
+
+    <div class="controls">
+      <div>
+        <label for="name-select">Select Name:</label>
+        <select id="name-select">
+          <option value="all">All Names (97)</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="badge-size">Badge Size:</label>
+        <select id="badge-size">
+          <option value="400">400 x 400 px</option>
+          <option value="500" selected>500 x 500 px</option>
+          <option value="600">600 x 600 px</option>
+          <option value="800">800 x 800 px</option>
+        </select>
+      </div>
+
+      <button onclick="generatePreview()">Preview Badge</button>
+      <button onclick="downloadCurrentBadge()">Download Current</button>
+      <button class="secondary" onclick="generateAllBadges()">Generate All Badges</button>
+    </div>
+
+    <!-- Preview Section -->
+    <div class="preview-section">
+      <h2>Preview</h2>
+      <canvas id="preview-canvas" width="500" height="500"></canvas>
+    </div>
+
+    <!-- Progress Bar for Batch Generation -->
+    <div class="progress-bar" id="progress-bar">
+      <div class="progress-bar-fill" id="progress-fill"></div>
+    </div>
+    <p class="progress-text" id="progress-text"></p>
+
+    <!-- Badge Grid for All -->
+    <div class="badge-grid" id="badge-grid"></div>
+  </div>
+
+  <!-- Hidden canvas for generation -->
+  <canvas id="hidden-canvas"></canvas>
+
+  <script src="js/allah-names-data.js"></script>
+  <script>
+    // Badge Generator
+    const BadgeGenerator = {
+      baseImage: null,
+      currentName: null,
+
+      // Initialize
+      async init() {
+        // Load base badge image
+        this.baseImage = new Image();
+        this.baseImage.crossOrigin = 'anonymous';
+
+        try {
+          await new Promise((resolve, reject) => {
+            this.baseImage.onload = resolve;
+            this.baseImage.onerror = reject;
+            // Use the badge image from images folder
+            this.baseImage.src = 'images/badge-base.webp';
+          });
+          this.useImage = true;
+        } catch (e) {
+          console.warn('Badge base image not found, using CSS fallback');
+          this.useImage = false;
+        }
+
+        // Populate dropdown
+        this.populateDropdown();
+
+        // Generate initial preview
+        this.currentName = window.allahNames[0];
+        this.generatePreview();
+      },
+
+      // Draw a small star
+      drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius) {
+        let rot = Math.PI / 2 * 3;
+        let x = cx;
+        let y = cy;
+        const step = Math.PI / spikes;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - outerRadius);
+        for (let i = 0; i < spikes; i++) {
+          x = cx + Math.cos(rot) * outerRadius;
+          y = cy + Math.sin(rot) * outerRadius;
+          ctx.lineTo(x, y);
+          rot += step;
+
+          x = cx + Math.cos(rot) * innerRadius;
+          y = cy + Math.sin(rot) * innerRadius;
+          ctx.lineTo(x, y);
+          rot += step;
+        }
+        ctx.lineTo(cx, cy - outerRadius);
+        ctx.closePath();
+        ctx.fill();
+      },
+
+      // Draw a small crescent
+      drawCrescent(ctx, cx, cy, radius) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.arc(cx + radius * 0.4, cy, radius * 0.8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      },
+
+      // Populate the name dropdown
+      populateDropdown() {
+        const select = document.getElementById('name-select');
+
+        window.allahNames.forEach(name => {
+          const option = document.createElement('option');
+          option.value = name.number;
+          option.textContent = `${name.number}. ${name.transliteration} - ${name.meaning}`;
+          select.appendChild(option);
+        });
+
+        select.addEventListener('change', (e) => {
+          if (e.target.value === 'all') {
+            this.currentName = window.allahNames[0];
+          } else {
+            this.currentName = window.allahNames.find(n => n.number === parseInt(e.target.value));
+          }
+          this.generatePreview();
+        });
+      },
+
+      // Draw scalloped badge shape (fallback)
+      drawScallopedBadge(ctx, centerX, centerY, radius, scallops = 20) {
+        const scallop_depth = radius * 0.1;
+        const inner_radius = radius - scallop_depth;
+
+        ctx.beginPath();
+        for (let i = 0; i < scallops; i++) {
+          const angle1 = (i / scallops) * Math.PI * 2;
+          const angle2 = ((i + 0.5) / scallops) * Math.PI * 2;
+          const angle3 = ((i + 1) / scallops) * Math.PI * 2;
+
+          const x1 = centerX + Math.cos(angle1) * radius;
+          const y1 = centerY + Math.sin(angle1) * radius;
+          const cx = centerX + Math.cos(angle2) * inner_radius;
+          const cy = centerY + Math.sin(angle2) * inner_radius;
+          const x2 = centerX + Math.cos(angle3) * radius;
+          const y2 = centerY + Math.sin(angle3) * radius;
+
+          if (i === 0) {
+            ctx.moveTo(x1, y1);
+          }
+          ctx.quadraticCurveTo(cx, cy, x2, y2);
+        }
+        ctx.closePath();
+      },
+
+      // Generate badge on canvas
+      generateBadge(canvas, name, size = 500) {
+        const ctx = canvas.getContext('2d');
+        canvas.width = size;
+        canvas.height = size;
+
+        // Clear canvas
+        ctx.clearRect(0, 0, size, size);
+
+        const centerX = size / 2;
+        const centerY = size / 2;
+
+        if (this.useImage && this.baseImage) {
+          // Draw base image
+          ctx.drawImage(this.baseImage, 0, 0, size, size);
+        } else {
+          // Draw CSS/Canvas fallback badge
+          const radius = size * 0.45;
+
+          // Draw outer scalloped shape with gradient
+          this.drawScallopedBadge(ctx, centerX, centerY, radius, 20);
+
+          // Create gold gradient
+          const gradient = ctx.createRadialGradient(
+            centerX - size * 0.1, centerY - size * 0.1, 0,
+            centerX, centerY, radius
+          );
+          gradient.addColorStop(0, '#FFE5A0');
+          gradient.addColorStop(0.3, '#FFD700');
+          gradient.addColorStop(0.6, '#DAA520');
+          gradient.addColorStop(1, '#B8860B');
+
+          ctx.fillStyle = gradient;
+          ctx.fill();
+
+          // Add border
+          ctx.strokeStyle = '#8B7355';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // Draw inner circle
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, radius * 0.85, 0, Math.PI * 2);
+          ctx.strokeStyle = '#B8860B';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // Add decorative elements (stars and crescents)
+          ctx.fillStyle = '#C9A94B';
+          const decorRadius = radius * 0.75;
+          const decorations = [
+            { angle: -Math.PI/3, type: 'star' },
+            { angle: -Math.PI/6, type: 'crescent' },
+            { angle: Math.PI/6, type: 'star' },
+            { angle: Math.PI/3, type: 'dot' },
+            { angle: Math.PI * 2/3, type: 'star' },
+            { angle: Math.PI * 5/6, type: 'crescent' },
+            { angle: -Math.PI * 5/6, type: 'star' },
+            { angle: -Math.PI * 2/3, type: 'dot' },
+          ];
+
+          decorations.forEach(d => {
+            const x = centerX + Math.cos(d.angle) * decorRadius;
+            const y = centerY + Math.sin(d.angle) * decorRadius;
+
+            if (d.type === 'star') {
+              this.drawStar(ctx, x, y, 5, size * 0.02, size * 0.01);
+            } else if (d.type === 'crescent') {
+              this.drawCrescent(ctx, x, y, size * 0.025);
+            } else {
+              ctx.beginPath();
+              ctx.arc(x, y, size * 0.008, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          });
+        }
+
+        // Calculate font sizes based on badge size
+        const arabicFontSize = Math.round(size * 0.16);
+        const translitFontSize = Math.round(size * 0.06);
+        const meaningFontSize = Math.round(size * 0.045);
+
+        // Text color - dark brown/gold for contrast on gold badge
+        const textColor = '#5C4033';
+        const shadowColor = 'rgba(255, 255, 255, 0.5)';
+
+        // Draw Arabic name (larger, centered)
+        ctx.save();
+        ctx.font = `bold ${arabicFontSize}px 'Amiri', 'Traditional Arabic', serif`;
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = shadowColor;
+        ctx.shadowBlur = 3;
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 1;
+        ctx.fillText(name.arabic, centerX, centerY - size * 0.08);
+        ctx.restore();
+
+        // Draw transliteration (smaller, below Arabic)
+        ctx.save();
+        ctx.font = `600 ${translitFontSize}px 'Segoe UI', sans-serif`;
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = shadowColor;
+        ctx.shadowBlur = 2;
+        ctx.fillText(name.transliteration, centerX, centerY + size * 0.08);
+        ctx.restore();
+
+        // Draw meaning (smallest, at bottom)
+        ctx.save();
+        ctx.font = `italic ${meaningFontSize}px 'Segoe UI', sans-serif`;
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = shadowColor;
+        ctx.shadowBlur = 2;
+
+        // Handle long meanings by wrapping
+        const maxWidth = size * 0.7;
+        const meaning = name.meaning;
+
+        if (ctx.measureText(meaning).width > maxWidth) {
+          // Split into two lines
+          const words = meaning.split(' ');
+          let line1 = '';
+          let line2 = '';
+          let midpoint = Math.ceil(words.length / 2);
+
+          for (let i = 0; i < words.length; i++) {
+            if (i < midpoint) {
+              line1 += (line1 ? ' ' : '') + words[i];
+            } else {
+              line2 += (line2 ? ' ' : '') + words[i];
+            }
+          }
+
+          ctx.fillText(line1, centerX, centerY + size * 0.2);
+          ctx.fillText(line2, centerX, centerY + size * 0.26);
+        } else {
+          ctx.fillText(meaning, centerX, centerY + size * 0.2);
+        }
+        ctx.restore();
+
+        return canvas;
+      },
+
+      // Generate preview
+      generatePreview() {
+        const canvas = document.getElementById('preview-canvas');
+        const size = parseInt(document.getElementById('badge-size').value);
+        canvas.width = size;
+        canvas.height = size;
+        this.generateBadge(canvas, this.currentName, size);
+      },
+
+      // Download current badge
+      downloadCurrentBadge() {
+        const canvas = document.getElementById('preview-canvas');
+        const name = this.currentName;
+        const filename = `allah-name-${name.number}-${name.transliteration.toLowerCase().replace(/[^a-z0-9]/g, '-')}.png`;
+
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      },
+
+      // Generate all badges
+      async generateAllBadges() {
+        const grid = document.getElementById('badge-grid');
+        const progressBar = document.getElementById('progress-bar');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+        const size = parseInt(document.getElementById('badge-size').value);
+
+        grid.innerHTML = '';
+        progressBar.classList.add('active');
+
+        const total = window.allahNames.length;
+
+        for (let i = 0; i < total; i++) {
+          const name = window.allahNames[i];
+
+          // Update progress
+          const progress = Math.round(((i + 1) / total) * 100);
+          progressFill.style.width = progress + '%';
+          progressText.textContent = `Generating badge ${i + 1} of ${total}... (${name.transliteration})`;
+
+          // Create badge item
+          const item = document.createElement('div');
+          item.className = 'badge-item';
+
+          const canvas = document.createElement('canvas');
+          canvas.width = size;
+          canvas.height = size;
+          this.generateBadge(canvas, name, size);
+
+          const info = document.createElement('div');
+          info.className = 'badge-info';
+          info.innerHTML = `<span class="badge-number">#${name.number}</span> ${name.transliteration}`;
+
+          const downloadBtn = document.createElement('button');
+          downloadBtn.textContent = 'Download';
+          downloadBtn.onclick = () => {
+            const filename = `allah-name-${name.number}-${name.transliteration.toLowerCase().replace(/[^a-z0-9]/g, '-')}.png`;
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+          };
+
+          item.appendChild(canvas);
+          item.appendChild(info);
+          item.appendChild(downloadBtn);
+          grid.appendChild(item);
+
+          // Small delay to prevent UI freeze
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
+
+        progressText.textContent = `All ${total} badges generated! Click individual badges to download.`;
+
+        // Add download all button
+        setTimeout(() => {
+          progressBar.classList.remove('active');
+        }, 2000);
+      }
+    };
+
+    // Global functions for button onclick
+    function generatePreview() {
+      BadgeGenerator.generatePreview();
+    }
+
+    function downloadCurrentBadge() {
+      BadgeGenerator.downloadCurrentBadge();
+    }
+
+    function generateAllBadges() {
+      BadgeGenerator.generateAllBadges();
+    }
+
+    // Initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      BadgeGenerator.init().catch(err => {
+        console.error('Failed to initialize badge generator:', err);
+        alert('Failed to load badge image. Make sure images/badge-base.webp exists.');
+      });
+    });
+  </script>
+</body>
+</html>

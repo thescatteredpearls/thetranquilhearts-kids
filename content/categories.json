@@ -18,10 +18,7 @@
   "create": [
     { "id": "habit", "name": "Habit", "icon": "📋" },
     { "id": "activities", "name": "Activities", "icon": "🌈" },
-    { "id": "etiquettes", "name": "Etiquettes", "icon": "⏳" },
     { "id": "bookmarks", "name": "Bookmarks", "icon": "🔖" },
-    { "id": "reminders", "name": "Reminders", "icon": "🔔" },
-    { "id": "badges", "name": "Badges", "icon": "🏆" },
-    { "id": "general", "name": "General", "icon": "🌸" }
+    { "id": "reminders", "name": "Reminders", "icon": "🔔" }
   ]
 }

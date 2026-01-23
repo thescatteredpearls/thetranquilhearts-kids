@@ -1138,6 +1138,189 @@ var DownloadSystem = {
   }
 };
 
+// ========== ALLAH NAME BADGE SYSTEM ==========
+var BadgeSystem = {
+  baseImage: null,
+  imageLoaded: false,
+
+  // Initialize - load badge base image
+  init: function() {
+    var self = this;
+    this.baseImage = new Image();
+    this.baseImage.crossOrigin = 'anonymous';
+    this.baseImage.onload = function() {
+      self.imageLoaded = true;
+      console.log('✅ Badge base image loaded');
+    };
+    this.baseImage.onerror = function() {
+      console.warn('Badge base image not found, using fallback');
+      self.imageLoaded = false;
+    };
+    this.baseImage.src = 'images/badge-base.webp';
+  },
+
+  // Draw scalloped badge shape (fallback)
+  drawScallopedBadge: function(ctx, centerX, centerY, radius, scallops) {
+    scallops = scallops || 20;
+    var scallop_depth = radius * 0.1;
+    var inner_radius = radius - scallop_depth;
+
+    ctx.beginPath();
+    for (var i = 0; i < scallops; i++) {
+      var angle1 = (i / scallops) * Math.PI * 2;
+      var angle2 = ((i + 0.5) / scallops) * Math.PI * 2;
+      var angle3 = ((i + 1) / scallops) * Math.PI * 2;
+
+      var x1 = centerX + Math.cos(angle1) * radius;
+      var y1 = centerY + Math.sin(angle1) * radius;
+      var cx = centerX + Math.cos(angle2) * inner_radius;
+      var cy = centerY + Math.sin(angle2) * inner_radius;
+      var x2 = centerX + Math.cos(angle3) * radius;
+      var y2 = centerY + Math.sin(angle3) * radius;
+
+      if (i === 0) {
+        ctx.moveTo(x1, y1);
+      }
+      ctx.quadraticCurveTo(cx, cy, x2, y2);
+    }
+    ctx.closePath();
+  },
+
+  // Generate badge on canvas
+  generateBadge: function(canvas, allahName, size) {
+    size = size || 300;
+    var ctx = canvas.getContext('2d');
+    canvas.width = size;
+    canvas.height = size;
+
+    ctx.clearRect(0, 0, size, size);
+
+    var centerX = size / 2;
+    var centerY = size / 2;
+
+    if (this.imageLoaded && this.baseImage) {
+      ctx.drawImage(this.baseImage, 0, 0, size, size);
+    } else {
+      // Fallback: draw gold badge
+      var radius = size * 0.45;
+      this.drawScallopedBadge(ctx, centerX, centerY, radius, 20);
+
+      var gradient = ctx.createRadialGradient(
+        centerX - size * 0.1, centerY - size * 0.1, 0,
+        centerX, centerY, radius
+      );
+      gradient.addColorStop(0, '#FFE5A0');
+      gradient.addColorStop(0.3, '#FFD700');
+      gradient.addColorStop(0.6, '#DAA520');
+      gradient.addColorStop(1, '#B8860B');
+
+      ctx.fillStyle = gradient;
+      ctx.fill();
+      ctx.strokeStyle = '#8B7355';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Inner circle
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius * 0.85, 0, Math.PI * 2);
+      ctx.strokeStyle = '#B8860B';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // Text settings
+    var arabicFontSize = Math.round(size * 0.16);
+    var translitFontSize = Math.round(size * 0.06);
+    var meaningFontSize = Math.round(size * 0.045);
+    var textColor = '#5C4033';
+    var shadowColor = 'rgba(255, 255, 255, 0.5)';
+
+    // Draw Arabic name
+    ctx.save();
+    ctx.font = 'bold ' + arabicFontSize + 'px Amiri, Traditional Arabic, serif';
+    ctx.fillStyle = textColor;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = shadowColor;
+    ctx.shadowBlur = 3;
+    ctx.shadowOffsetX = 1;
+    ctx.shadowOffsetY = 1;
+    ctx.fillText(allahName.arabic, centerX, centerY - size * 0.08);
+    ctx.restore();
+
+    // Draw transliteration
+    ctx.save();
+    ctx.font = '600 ' + translitFontSize + 'px Segoe UI, sans-serif';
+    ctx.fillStyle = textColor;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = shadowColor;
+    ctx.shadowBlur = 2;
+    ctx.fillText(allahName.transliteration, centerX, centerY + size * 0.08);
+    ctx.restore();
+
+    // Draw meaning
+    ctx.save();
+    ctx.font = 'italic ' + meaningFontSize + 'px Segoe UI, sans-serif';
+    ctx.fillStyle = textColor;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = shadowColor;
+    ctx.shadowBlur = 2;
+
+    var maxWidth = size * 0.7;
+    var meaning = allahName.meaning;
+
+    if (ctx.measureText(meaning).width > maxWidth) {
+      var words = meaning.split(' ');
+      var line1 = '';
+      var line2 = '';
+      var midpoint = Math.ceil(words.length / 2);
+
+      for (var i = 0; i < words.length; i++) {
+        if (i < midpoint) {
+          line1 += (line1 ? ' ' : '') + words[i];
+        } else {
+          line2 += (line2 ? ' ' : '') + words[i];
+        }
+      }
+
+      ctx.fillText(line1, centerX, centerY + size * 0.2);
+      ctx.fillText(line2, centerX, centerY + size * 0.26);
+    } else {
+      ctx.fillText(meaning, centerX, centerY + size * 0.2);
+    }
+    ctx.restore();
+
+    return canvas;
+  },
+
+  // Create badge HTML for detail page
+  createBadgeHtml: function(allahName) {
+    if (!allahName) return '';
+
+    return '<div class="allah-name-badge-section">' +
+      '<h3 class="badge-section-title">✨ You Learned About ✨</h3>' +
+      '<div class="allah-name-badge-container">' +
+        '<canvas id="allah-name-badge" width="300" height="300"></canvas>' +
+      '</div>' +
+      '<p class="badge-section-subtitle">One of the most Beautiful Names of Allah</p>' +
+    '</div>';
+  },
+
+  // Render badge after content loads
+  renderBadge: function(allahName, size) {
+    var canvas = document.getElementById('allah-name-badge');
+    if (canvas && allahName) {
+      this.generateBadge(canvas, allahName, size || 300);
+    }
+  }
+};
+
+// Initialize badge system
+BadgeSystem.init();
+window.BadgeSystem = BadgeSystem;
+
 // Detail Page (Enhanced with Downloads)
 function findItemById(id) {
   var item = state.inspire.find(function(i) { return i.id === id; });
@@ -1169,15 +1352,19 @@ function renderDetailContent(item, type) {
   // Check if this is Names of Allah category
   var isAllahName = hasCategory(item, 'Names of Allah');
   var headerHtml = '';
+  var badgeHtml = '';
+  var allahName = null;
 
   if (isAllahName) {
-    var allahName = findAllahName(item.title);
+    allahName = findAllahName(item.title);
     headerHtml = '<div class="allah-name-detail-header">' +
       (allahName && allahName.number ? '<span class="allah-name-detail-number">' + allahName.number + '</span>' : '') +
       '<span class="allah-name-detail-arabic">' + (allahName ? allahName.arabic : '') + '</span>' +
       '<span class="allah-name-detail-transliteration">' + (allahName ? allahName.transliteration : '') + '</span>' +
       '<span class="allah-name-detail-meaning">' + (allahName ? allahName.meaning : '') + '</span>' +
       '</div>';
+    // Add badge section
+    badgeHtml = BadgeSystem.createBadgeHtml(allahName);
   } else {
     // Add featured image if it exists (not for Names of Allah)
     headerHtml = item.image ? '<div class="content-header-image"><img src="' + escapeHtml(item.image) + '" alt="' + escapeHtml(item.title) + '" class="content-featured-image"></div>' : '';
@@ -1191,10 +1378,18 @@ function renderDetailContent(item, type) {
     downloadAllBtn +
     '</header>' +
     '<div class="content-body">' + processedContent + '</div>' +
+    badgeHtml +
     (hasQuiz(item) ? '<div class="content-quiz-section"><div class="quiz-cta"><div class="quiz-cta-icon">🧠</div><div class="quiz-cta-text"><h3>Test Your Knowledge!</h3><p>Take a fun quiz about this story.</p></div><button class="btn btn-primary" onclick="QuizSystem.startQuiz(\'' + item.id + '\')">✨ Start Quiz</button></div></div>' : '') +
     '<footer class="content-footer"><div class="content-actions">' +
     BookmarkSystem.createButton(item.id) + LikeSystem.createButton(item.id) + ShareSystem.createButton(item.title, window.location.href) +
     '</div><a href="' + type + '.html" class="btn btn-back">← Back to ' + type.charAt(0).toUpperCase() + type.slice(1) + '</a></footer></article>';
+
+  // Render the badge canvas after DOM is updated
+  if (isAllahName && allahName) {
+    setTimeout(function() {
+      BadgeSystem.renderBadge(allahName, 300);
+    }, 100);
+  }
 }
 
 function renderRelatedContent(current, type) {

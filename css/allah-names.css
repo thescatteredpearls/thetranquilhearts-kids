@@ -399,20 +399,142 @@
   .allah-name-arabic {
     font-size: 2.5rem;
   }
-  
+
   .allah-name-transliteration {
     font-size: 1.3rem;
   }
-  
+
   .allah-name-meaning {
     font-size: 0.95rem;
   }
-  
+
   .allah-name-detail-arabic {
     font-size: 2.8rem;
   }
-  
+
   .allah-name-detail-transliteration {
     font-size: 1.6rem;
+  }
+}
+
+/* ========================================
+   ALLAH NAME BADGE SECTION
+   Displayed at the end of each story
+   ======================================== */
+
+.allah-name-badge-section {
+  background: linear-gradient(135deg, #FFF8E7 0%, #FFF3D6 50%, #FFEDCC 100%);
+  border-radius: 24px;
+  padding: 40px 30px;
+  margin: 40px 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(218, 165, 32, 0.15);
+}
+
+.allah-name-badge-section::before {
+  content: '✨';
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  font-size: 80px;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.allah-name-badge-section::after {
+  content: '🌟';
+  position: absolute;
+  bottom: -20px;
+  right: -20px;
+  font-size: 80px;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.badge-section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #8B6914;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 2;
+}
+
+.allah-name-badge-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+  position: relative;
+  z-index: 2;
+}
+
+.allah-name-badge-container canvas {
+  max-width: 300px;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 8px 24px rgba(218, 165, 32, 0.3));
+  transition: transform 0.3s ease;
+}
+
+.allah-name-badge-container canvas:hover {
+  transform: scale(1.05);
+}
+
+.badge-section-subtitle {
+  font-size: 1rem;
+  color: #A67C00;
+  font-style: italic;
+  margin-top: 16px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Dark mode support */
+.dark-mode .allah-name-badge-section {
+  background: linear-gradient(135deg, #2D2A1F 0%, #3D3825 50%, #2A2617 100%);
+}
+
+.dark-mode .badge-section-title {
+  color: #FFD700;
+}
+
+.dark-mode .badge-section-subtitle {
+  color: #DAA520;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .allah-name-badge-section {
+    padding: 30px 20px;
+    margin: 30px 0;
+  }
+
+  .badge-section-title {
+    font-size: 1.3rem;
+  }
+
+  .allah-name-badge-container canvas {
+    max-width: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .allah-name-badge-section {
+    padding: 24px 16px;
+  }
+
+  .badge-section-title {
+    font-size: 1.1rem;
+  }
+
+  .allah-name-badge-container canvas {
+    max-width: 200px;
+  }
+
+  .badge-section-subtitle {
+    font-size: 0.9rem;
   }
 }
