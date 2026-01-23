@@ -9,7 +9,23 @@ const SITE_CONFIG = {
   tagline: "Growing Hearts Growing Faith",
   email: "geoffrin.j.11@gmail.com",
   year: new Date().getFullYear(),
-  description: "Islamic stories, activities, and wisdom for children and families."
+  description: "Islamic stories, activities, and wisdom for children and families.",
+
+  // SEO Configuration
+  seo: {
+    siteUrl: "https://kids.thetranquilheart.com",
+    defaultImage: "images/og-default.webp",
+    twitterHandle: "",
+
+    // Page-specific descriptions
+    pages: {
+      index: "Islamic stories, activities, and wisdom for children and families. Growing Hearts Growing Faith.",
+      inspire: "Inspiring Islamic stories of prophets, companions, and scholars for children.",
+      grow: "Daily prayers, Names of Allah, and faith-building activities for young Muslims.",
+      create: "Printable Islamic activities, habit trackers, and creative resources for kids.",
+      bookmarks: "Your saved Islamic stories and learning resources."
+    }
+  }
 };
 
 // Make available globally

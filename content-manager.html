@@ -738,6 +738,99 @@
       gap: 8px;
       margin-top: 12px;
     }
+
+    /* Category Checkboxes */
+    .category-checkboxes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      background: white;
+      min-height: 50px;
+    }
+    .category-checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .category-checkbox-item:hover {
+      border-color: var(--color-primary);
+    }
+    .category-checkbox-item.checked {
+      background: var(--color-primary-light);
+      border-color: var(--color-primary);
+    }
+    .category-checkbox-item input[type="checkbox"] {
+      display: none;
+    }
+    .category-checkbox-item .check-icon {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--color-border);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      transition: all 0.2s;
+    }
+    .category-checkbox-item.checked .check-icon {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: white;
+    }
+
+    /* Category Images Section */
+    .category-images-section {
+      background: var(--color-bg);
+      border: 2px dashed var(--color-border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 16px;
+      display: none;
+    }
+    .category-images-section.visible {
+      display: block;
+    }
+    .category-images-section h4 {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      color: var(--color-primary-dark);
+    }
+    .category-image-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+      padding: 10px;
+      background: white;
+      border-radius: 8px;
+    }
+    .category-image-row .category-name {
+      min-width: 100px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .category-image-row input {
+      flex: 1;
+    }
+
+    /* Multiple badges in table */
+    .badges-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
     
     /* Responsive */
     @media (max-width: 900px) {
@@ -1233,14 +1326,24 @@
             
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Category <span class="required">*</span></label>
-                <select class="form-select" id="content-category" required>
-                  <option value="">Select category...</option>
-                </select>
+                <label class="form-label">Categories <span class="required">*</span></label>
+                <div class="category-checkboxes" id="content-categories">
+                  <!-- Category checkboxes will be rendered here -->
+                </div>
+                <p class="form-help">Select one or more categories</p>
               </div>
               <div class="form-group">
                 <label class="form-label">Section</label>
                 <input type="text" class="form-input" id="content-section-field" readonly>
+              </div>
+            </div>
+
+            <!-- Category Images Section (shows when multiple categories selected) -->
+            <div class="category-images-section" id="category-images-section">
+              <h4>📸 Category-Specific Images</h4>
+              <p class="form-help" style="margin-bottom: 12px;">Optionally set different cover images for each category. Leave blank to use the main cover image.</p>
+              <div id="category-images-container">
+                <!-- Category image inputs will be rendered here -->
               </div>
             </div>
             
@@ -1388,9 +1491,15 @@ For images (Create section): [IMAGE:0], [IMAGE:1], etc."></textarea>
     
     // Current tags for the form
     let currentTags = [];
-    
+
     // Current uploaded images
     let currentImages = [];
+
+    // Current selected categories
+    let selectedCategories = [];
+
+    // Current category images
+    let currentCategoryImages = {};
     
     // Common tag suggestions
     const commonTags = [
@@ -1522,6 +1631,84 @@ For images (Create section): [IMAGE:0], [IMAGE:1], etc."></textarea>
       }
     }
     
+    // Render category checkboxes
+    function renderCategoryCheckboxes(section) {
+      const container = document.getElementById('content-categories');
+      const cats = data.categories[section];
+
+      if (cats.length === 0) {
+        container.innerHTML = '<p style="color: var(--color-text-light); font-size: 13px;">No categories available. Add categories first.</p>';
+        return;
+      }
+
+      container.innerHTML = cats.map(cat => {
+        const isChecked = selectedCategories.includes(cat.name);
+        return `
+          <label class="category-checkbox-item ${isChecked ? 'checked' : ''}" onclick="toggleCategory('${escapeHtml(cat.name)}')">
+            <span class="check-icon">${isChecked ? '✓' : ''}</span>
+            <span>${cat.icon} ${escapeHtml(cat.name)}</span>
+          </label>
+        `;
+      }).join('');
+    }
+
+    // Toggle category selection
+    function toggleCategory(categoryName) {
+      const index = selectedCategories.indexOf(categoryName);
+      if (index === -1) {
+        selectedCategories.push(categoryName);
+      } else {
+        selectedCategories.splice(index, 1);
+        // Remove from categoryImages if unchecked
+        delete currentCategoryImages[categoryName];
+      }
+
+      // Re-render checkboxes
+      const section = document.getElementById('content-section').value;
+      renderCategoryCheckboxes(section);
+
+      // Update category images section
+      updateCategoryImagesSection(section);
+    }
+
+    // Update category images section visibility and content
+    function updateCategoryImagesSection(section) {
+      const container = document.getElementById('category-images-section');
+      const imagesContainer = document.getElementById('category-images-container');
+
+      if (selectedCategories.length > 1) {
+        container.classList.add('visible');
+
+        // Get category icons
+        const cats = data.categories[section];
+
+        imagesContainer.innerHTML = selectedCategories.map(catName => {
+          const cat = cats.find(c => c.name === catName);
+          const icon = cat ? cat.icon : '📁';
+          const currentValue = currentCategoryImages[catName] || '';
+          return `
+            <div class="category-image-row">
+              <span class="category-name">${icon} ${escapeHtml(catName)}</span>
+              <input type="text" class="form-input" placeholder="images/section/category/image.webp"
+                     value="${escapeHtml(currentValue)}"
+                     onchange="updateCategoryImage('${escapeHtml(catName)}', this.value)">
+            </div>
+          `;
+        }).join('');
+      } else {
+        container.classList.remove('visible');
+      }
+    }
+
+    // Update category image value
+    function updateCategoryImage(categoryName, value) {
+      if (value.trim()) {
+        currentCategoryImages[categoryName] = value.trim();
+      } else {
+        delete currentCategoryImages[categoryName];
+      }
+    }
+
     // Initialize tags input
     function initTagsInput() {
       const input = document.getElementById('tags-input');
@@ -1691,24 +1878,34 @@ For images (Create section): [IMAGE:0], [IMAGE:1], etc."></textarea>
       
       tbody.innerHTML = items.map((item, index) => {
         const published = item.published !== false;
-        const tagsHtml = item.tags && item.tags.length > 0 
-          ? item.tags.slice(0, 3).map(t => `<span class="badge badge-tag">${escapeHtml(t)}</span>`).join('') + 
+        const tagsHtml = item.tags && item.tags.length > 0
+          ? item.tags.slice(0, 3).map(t => `<span class="badge badge-tag">${escapeHtml(t)}</span>`).join('') +
             (item.tags.length > 3 ? `<span class="badge badge-tag">+${item.tags.length - 3}</span>` : '')
           : '<span style="color: var(--color-text-light); font-size: 12px;">No tags</span>';
-        
-        const imageCount = item.images && item.images.length > 0 
-          ? `<span class="badge badge-category">📷 ${item.images.length}</span>` 
+
+        const imageCount = item.images && item.images.length > 0
+          ? `<span class="badge badge-category">📷 ${item.images.length}</span>`
           : '<span style="color: var(--color-text-light); font-size: 12px;">—</span>';
-        
+
         const imageTd = section === 'create' ? `<td>${imageCount}</td>` : '';
-        
+
+        // Handle both string and array categories
+        const categories = Array.isArray(item.category) ? item.category : [item.category];
+        const categoryHtml = categories.length > 1
+          ? `<div class="badges-group">${categories.map(c => `<span class="badge badge-category">${escapeHtml(c)}</span>`).join('')}</div>`
+          : `<span class="badge badge-category">${escapeHtml(categories[0])}</span>`;
+
+        // Show indicator if categoryImages exist
+        const hasCategoryImages = item.categoryImages && Object.keys(item.categoryImages).length > 0;
+        const categoryImagesIndicator = hasCategoryImages ? '<br><small style="color: var(--color-primary);">📷 has category images</small>' : '';
+
         return `
           <tr>
             <td>
               <strong>${escapeHtml(item.title)}</strong>
               ${item.quiz && item.quiz.length > 0 ? `<br><small style="color: var(--color-info);">📝 ${item.quiz.length} quiz questions</small>` : ''}
             </td>
-            <td><span class="badge badge-category">${escapeHtml(item.category)}</span></td>
+            <td>${categoryHtml}${categoryImagesIndicator}</td>
             ${imageTd}
             <td>${tagsHtml}</td>
             <td><span class="badge ${published ? 'badge-published' : 'badge-draft'}">${published ? '✓ Published' : '📝 Draft'}</span></td>
@@ -1767,15 +1964,20 @@ For images (Create section): [IMAGE:0], [IMAGE:1], etc."></textarea>
             </tr>
           </thead>
           <tbody>
-            ${allContent.map(item => `
+            ${allContent.map(item => {
+              // Handle both string and array categories
+              const categories = Array.isArray(item.category) ? item.category : [item.category];
+              const categoryHtml = categories.slice(0, 2).map(c => `<span class="badge badge-category">${escapeHtml(c)}</span>`).join('') +
+                (categories.length > 2 ? `<span class="badge badge-category">+${categories.length - 2}</span>` : '');
+              return `
               <tr>
                 <td><span class="badge">${item.icon} ${item.type}</span></td>
                 <td>${escapeHtml(item.title)}</td>
-                <td><span class="badge badge-category">${escapeHtml(item.category)}</span></td>
+                <td>${categoryHtml}</td>
                 <td>${item.tags && item.tags.length > 0 ? item.tags.slice(0, 2).map(t => `<span class="badge badge-tag">${escapeHtml(t)}</span>`).join('') : '—'}</td>
                 <td>${item.date || 'N/A'}</td>
               </tr>
-            `).join('')}
+            `}).join('')}
           </tbody>
         </table>
       `;
@@ -1788,7 +1990,7 @@ For images (Create section): [IMAGE:0], [IMAGE:1], etc."></textarea>
       document.getElementById('content-section').value = section;
       document.getElementById('content-section-field').value = sectionNames[section];
       document.getElementById('content-index').value = index !== null ? index : '';
-      
+
       // Show/hide image upload section based on section
       const imageUploadSection = document.getElementById('image-upload-section');
       if (section === 'create') {
@@ -1796,44 +1998,49 @@ For images (Create section): [IMAGE:0], [IMAGE:1], etc."></textarea>
       } else {
         imageUploadSection.style.display = 'none';
       }
-      
-      // Populate category dropdown
-      const catSelect = document.getElementById('content-category');
-      catSelect.innerHTML = data.categories[section].map(c => 
-        `<option value="${escapeHtml(c.name)}">${c.icon} ${escapeHtml(c.name)}</option>`
-      ).join('');
-      
-      if (catSelect.options.length === 0) {
-        catSelect.innerHTML = '<option value="">-- Add categories first --</option>';
-      }
-      
+
       // Clear quiz container
       document.getElementById('quiz-container').innerHTML = '';
-      
-      // Clear tags and images
+
+      // Clear tags, images, categories, and categoryImages
       currentTags = [];
       currentImages = [];
+      selectedCategories = [];
+      currentCategoryImages = {};
       renderUploadedImages();
-      
+
       if (index !== null) {
         const item = data[section][index];
         document.getElementById('content-title').value = item.title || '';
-        document.getElementById('content-category').value = item.category || '';
         document.getElementById('content-image').value = item.image || '';
         document.getElementById('content-body').value = item.content || '';
         document.getElementById('content-published').checked = item.published !== false;
-        
+
+        // Load categories (support both string and array)
+        if (item.category) {
+          if (Array.isArray(item.category)) {
+            selectedCategories = [...item.category];
+          } else {
+            selectedCategories = [item.category];
+          }
+        }
+
+        // Load categoryImages
+        if (item.categoryImages && typeof item.categoryImages === 'object') {
+          currentCategoryImages = { ...item.categoryImages };
+        }
+
         // Load tags
         if (item.tags && Array.isArray(item.tags)) {
           currentTags = [...item.tags];
         }
-        
+
         // Load images (for create section)
         if (item.images && Array.isArray(item.images)) {
           currentImages = [...item.images];
           renderUploadedImages();
         }
-        
+
         // Load quiz questions
         if (item.quiz && item.quiz.length > 0) {
           item.quiz.forEach(q => addQuizQuestion(q));
@@ -1843,7 +2050,13 @@ For images (Create section): [IMAGE:0], [IMAGE:1], etc."></textarea>
         document.getElementById('content-published').checked = true;
         document.getElementById('content-section-field').value = sectionNames[section];
       }
-      
+
+      // Render category checkboxes
+      renderCategoryCheckboxes(section);
+
+      // Update category images section
+      updateCategoryImagesSection(section);
+
       renderTags();
       updatePreview();
       document.getElementById('content-modal').classList.add('open');
@@ -2015,43 +2228,55 @@ For images (Create section): [IMAGE:0], [IMAGE:1], etc."></textarea>
       const indexStr = document.getElementById('content-index').value;
       const index = indexStr !== '' ? parseInt(indexStr) : null;
       const title = document.getElementById('content-title').value.trim();
-      
+
+      // Validate at least one category is selected
+      if (selectedCategories.length === 0) {
+        showAlert('Please select at least one category', 'error');
+        return;
+      }
+
       const item = {
-        id: index !== null 
-          ? data[section][index].id 
+        id: index !== null
+          ? data[section][index].id
           : title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
         title: title,
         section: section,
-        category: document.getElementById('content-category').value,
+        // Save as single string if only one category, array if multiple
+        category: selectedCategories.length === 1 ? selectedCategories[0] : [...selectedCategories],
         date: new Date().toISOString().split('T')[0],
         image: document.getElementById('content-image').value.trim(),
         content: document.getElementById('content-body').value,
         published: publish ? true : document.getElementById('content-published').checked
       };
-      
+
+      // Add categoryImages if multiple categories and images are defined
+      if (selectedCategories.length > 1 && Object.keys(currentCategoryImages).length > 0) {
+        item.categoryImages = { ...currentCategoryImages };
+      }
+
       // Add tags if any exist
       if (currentTags.length > 0) {
         item.tags = [...currentTags];
       }
-      
+
       // Add images if any exist (for create section)
       if (section === 'create' && currentImages.length > 0) {
         item.images = [...currentImages];
       }
-      
+
       // Add quiz if any questions exist
       const quiz = getQuizData();
       if (quiz.length > 0) {
         item.quiz = quiz;
       }
-      
+
       if (index !== null) {
         item.date = data[section][index].date; // Preserve original date
         data[section][index] = item;
       } else {
         data[section].unshift(item);
       }
-      
+
       saveData();
       closeModal();
       showAlert(index !== null ? 'Content updated successfully!' : 'Content added successfully!', 'success');
@@ -2069,6 +2294,8 @@ For images (Create section): [IMAGE:0], [IMAGE:1], etc."></textarea>
       document.getElementById('content-modal').classList.remove('open');
       currentTags = [];
       currentImages = [];
+      selectedCategories = [];
+      currentCategoryImages = {};
     }
     
     // Category Modal Functions

@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /content-manager.html
+
+Sitemap: https://kids.thetranquilheart.com/sitemap.xml

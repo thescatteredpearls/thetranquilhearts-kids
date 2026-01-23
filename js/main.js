@@ -6,14 +6,48 @@ const DATA_SOURCES = {
   create: 'data/create.json'
 };
 
+// ========== CATEGORY HELPER FUNCTIONS ==========
+// Support for both string and array categories
+
+function getCategories(item) {
+  if (!item || !item.category) return [];
+  return Array.isArray(item.category) ? item.category : [item.category];
+}
+
+function hasCategory(item, categoryName) {
+  return getCategories(item).indexOf(categoryName) !== -1;
+}
+
+function getPrimaryCategory(item) {
+  var cats = getCategories(item);
+  return cats.length > 0 ? cats[0] : null;
+}
+
+// Get appropriate image based on current filter (for multi-category items)
+function getItemImage(item, categories) {
+  if (!item) return null;
+
+  // If item has categoryImages and current filter matches one
+  if (item.categoryImages && state.currentFilter && state.currentFilter !== 'all') {
+    // Find the category name from the filter id
+    var cat = categories ? categories.find(function(c) { return c.id === state.currentFilter; }) : null;
+    if (cat && item.categoryImages[cat.name]) {
+      return item.categoryImages[cat.name];
+    }
+  }
+
+  // Fallback to default image
+  return item.image || null;
+}
+
 // ========== ALLAH NAMES HELPER FUNCTIONS ==========
 
 function isAllahNameContent(item) {
-  return item && item.category === "Names of Allah";
+  return item && hasCategory(item, "Names of Allah");
 }
 
 function getAllahNameFromContent(contentItem) {
-  if (!contentItem || contentItem.category !== "Names of Allah") {
+  if (!contentItem || !hasCategory(contentItem, "Names of Allah")) {
     return null;
   }
   
@@ -150,17 +184,17 @@ async function loadContent() {
 function enrichCategoriesWithCounts() {
   if (state.categories.inspire) {
     state.categories.inspire = state.categories.inspire.map(function(c) {
-      return Object.assign({}, c, { count: state.inspire.filter(function(i) { return i.category === c.name; }).length });
+      return Object.assign({}, c, { count: state.inspire.filter(function(i) { return hasCategory(i, c.name); }).length });
     });
   }
   if (state.categories.grow) {
     state.categories.grow = state.categories.grow.map(function(c) {
-      return Object.assign({}, c, { count: state.grow.filter(function(i) { return i.category === c.name; }).length });
+      return Object.assign({}, c, { count: state.grow.filter(function(i) { return hasCategory(i, c.name); }).length });
     });
   }
   if (state.categories.create) {
     state.categories.create = state.categories.create.map(function(c) {
-      return Object.assign({}, c, { count: state.create.filter(function(i) { return i.category === c.name; }).length });
+      return Object.assign({}, c, { count: state.create.filter(function(i) { return hasCategory(i, c.name); }).length });
     });
   }
 }
@@ -184,7 +218,7 @@ async function fetchJSON(path) {
 
 // Check if content is an Allah name based on category
 function isAllahNameContent(item) {
-  return item && item.category === "Names of Allah";
+  return item && hasCategory(item, "Names of Allah");
 }
 
 // Get Allah name data from content slug/id
@@ -216,7 +250,7 @@ function getAllahNameData(slug) {
 
 // Get Allah name from JSON content item
 function getAllahNameFromContent(contentItem) {
-  if (!contentItem || contentItem.category !== "Names of Allah") {
+  if (!contentItem || !hasCategory(contentItem, "Names of Allah")) {
     return null;
   }
   
@@ -368,7 +402,7 @@ async function renderDetailPage() {
       const nextName = allahName.number < 99 ? window.allahNames[allahName.number] : null;
       
       // Find previous and next items in JSON
-      const allNamesOfAllah = data[type].filter(item => item.category === "Names of Allah");
+      const allNamesOfAllah = data[type].filter(item => hasCategory(item, "Names of Allah"));
       const currentIndex = allNamesOfAllah.findIndex(item => item.id === id);
       const prevItem = currentIndex > 0 ? allNamesOfAllah[currentIndex - 1] : null;
       const nextItem = currentIndex < allNamesOfAllah.length - 1 ? allNamesOfAllah[currentIndex + 1] : null;
@@ -600,12 +634,12 @@ function generateAllahNamesJSON() {
 // generateAllahNamesJSON();
 // Helper function to check if content is an Allah name
 function isAllahNameContent(item) {
-  return item && item.category === "Names of Allah";
+  return item && hasCategory(item, "Names of Allah");
 }
 
 // Helper function to get Allah name data from content
 function getAllahNameFromContent(contentItem) {
-  if (!contentItem || contentItem.category !== "Names of Allah") {
+  if (!contentItem || !hasCategory(contentItem, "Names of Allah")) {
     return null;
   }
   
@@ -725,8 +759,89 @@ function renderDetailPage() {
   var result = findItemById(id);
   if (!result.item) return showNotFound();
   document.title = result.item.title + ' | ' + (window.SITE_CONFIG ? window.SITE_CONFIG.name : 'The Tranquil Heart Kids');
+  updatePageMeta(result.item);
   renderDetailContent(result.item, result.contentType);
   renderRelatedContent(result.item, result.contentType);
+}
+
+// SEO: Update page meta tags dynamically for detail pages
+function updatePageMeta(item) {
+  if (!item) return;
+
+  var siteConfig = window.SITE_CONFIG || {};
+  var seoConfig = siteConfig.seo || {};
+  var siteUrl = seoConfig.siteUrl || 'https://kids.thetranquilheart.com';
+  var siteName = siteConfig.name || 'The Tranquil Heart Kids';
+  var defaultImage = siteUrl + '/' + (seoConfig.defaultImage || 'images/og-default.webp');
+
+  // Create description from content (first 160 chars)
+  var description = item.content ? item.content.replace(/[#*_>`\[\]\n]+/g, ' ').trim().substring(0, 160) + '...' : siteConfig.description || '';
+
+  // Get the full title
+  var fullTitle = item.title + ' | ' + siteName;
+
+  // Get image URL
+  var imageUrl = item.image ? (item.image.startsWith('http') ? item.image : siteUrl + '/' + item.image) : defaultImage;
+
+  // Get page URL
+  var pageUrl = siteUrl + '/detail.html?id=' + item.id;
+
+  // Update meta description
+  var metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) metaDesc.setAttribute('content', description);
+
+  // Update canonical URL
+  var canonical = document.getElementById('canonical-url');
+  if (canonical) canonical.setAttribute('href', pageUrl);
+
+  // Update Open Graph tags
+  var ogTitle = document.getElementById('og-title');
+  if (ogTitle) ogTitle.setAttribute('content', fullTitle);
+
+  var ogDesc = document.getElementById('og-description');
+  if (ogDesc) ogDesc.setAttribute('content', description);
+
+  var ogUrl = document.getElementById('og-url');
+  if (ogUrl) ogUrl.setAttribute('content', pageUrl);
+
+  var ogImage = document.getElementById('og-image');
+  if (ogImage) ogImage.setAttribute('content', imageUrl);
+
+  // Update Twitter Card tags
+  var twitterTitle = document.getElementById('twitter-title');
+  if (twitterTitle) twitterTitle.setAttribute('content', fullTitle);
+
+  var twitterDesc = document.getElementById('twitter-description');
+  if (twitterDesc) twitterDesc.setAttribute('content', description);
+
+  var twitterImage = document.getElementById('twitter-image');
+  if (twitterImage) twitterImage.setAttribute('content', imageUrl);
+
+  // Update structured data
+  var structuredData = document.getElementById('structured-data');
+  if (structuredData) {
+    var schemaData = {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": item.title,
+      "description": description,
+      "image": imageUrl,
+      "datePublished": item.date || new Date().toISOString().split('T')[0],
+      "publisher": {
+        "@type": "Organization",
+        "name": siteName,
+        "logo": {
+          "@type": "ImageObject",
+          "url": siteUrl + "/images/favicon.svg"
+        }
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": pageUrl
+      }
+    };
+    structuredData.textContent = JSON.stringify(schemaData, null, 2);
+  }
 }
 
 function renderBookmarksPage() {
@@ -806,7 +921,7 @@ function renderFilteredCreate() {
 function getFiltered(items, cats) {
   if (state.currentFilter === 'all') return items;
   var cat = cats ? cats.find(function(c) { return c.id === state.currentFilter; }) : null;
-  if (cat) return items.filter(function(i) { return i.category === cat.name; });
+  if (cat) return items.filter(function(i) { return hasCategory(i, cat.name); });
   return items;
 }
 
@@ -846,20 +961,21 @@ function goToCreatePage(p) { currentPage.create = p; renderFilteredCreate(); win
 
 // Card Creators
 function createInspireCard(item) {
-  var cat = state.categories.inspire ? state.categories.inspire.find(function(c) { return c.name === item.category; }) : null;
+  var primaryCat = getPrimaryCategory(item);
+  var cat = state.categories.inspire ? state.categories.inspire.find(function(c) { return hasCategory(item, c.name); }) : null;
   var url = 'detail.html?id=' + item.id;
   var icon = cat ? cat.icon : '📖';
   var readingTime = calculateReadingTime(item.content);
-  var imageHtml = item.image 
+  var imageHtml = item.image
     ? '<img src="' + escapeHtml(item.image) + '" alt="' + escapeHtml(item.title) + '" class="inspire-card-img" loading="lazy">'
     : '<div class="inspire-card-placeholder"><span>' + icon + '</span></div>';
-  return '<article class="inspire-card" data-category="' + escapeHtml(item.category || '') + '">' +
+  return '<article class="inspire-card" data-category="' + escapeHtml(primaryCat || '') + '">' +
     '<a href="' + url + '" class="inspire-card-link">' +
     '<div class="inspire-card-image">' + BookmarkSystem.createButton(item.id, 'card') +
     imageHtml + '</div>' +
     '<div class="inspire-card-content">' +
     '<div class="inspire-card-meta">' +
-    '<span class="inspire-card-category">' + icon + ' ' + escapeHtml(item.category || 'Inspire') + '</span>' +
+    '<span class="inspire-card-category">' + icon + ' ' + escapeHtml(primaryCat || 'Inspire') + '</span>' +
     '<span class="reading-time">⏱️ ' + readingTime + ' min</span>' +
     '</div>' +
     '<h3 class="inspire-card-title">' + escapeHtml(item.title) + '</h3>' +
@@ -870,12 +986,14 @@ function createInspireCard(item) {
 }
 
 function createGrowCard(item) {
-  var cat = state.categories.grow ? state.categories.grow.find(function(c) { return c.name === item.category; }) : null;
+  var primaryCat = getPrimaryCategory(item);
+  var cat = state.categories.grow ? state.categories.grow.find(function(c) { return hasCategory(item, c.name); }) : null;
   var url = 'detail.html?id=' + item.id;
   var icon = cat ? cat.icon : '🌱';
   var readingTime = calculateReadingTime(item.content);
-  var isAllahName = item.category === 'Names of Allah';
+  var isAllahName = hasCategory(item, 'Names of Allah');
   var categoryId = cat ? cat.id : '';
+  var itemImage = getItemImage(item, state.categories.grow);
   var imageHtml;
   var dataAttr = ' data-grow-category="' + categoryId + '"';
 
@@ -888,21 +1006,21 @@ function createGrowCard(item) {
       '<span class="allah-name-transliteration">' + (allahName ? allahName.transliteration : escapeHtml(item.title)) + '</span>' +
       '<span class="allah-name-meaning">' + (allahName ? allahName.meaning : '') + '</span>' +
       '</div>';
-  } else if (item.image) {
-    imageHtml = '<img src="' + escapeHtml(item.image) + '" alt="' + escapeHtml(item.title) + '" class="grow-card-img" loading="lazy">';
+  } else if (itemImage) {
+    imageHtml = '<img src="' + escapeHtml(itemImage) + '" alt="' + escapeHtml(item.title) + '" class="grow-card-img" loading="lazy">';
   } else {
     imageHtml = '<div class="grow-card-placeholder grow-category-styled">' +
       '<span class="grow-category-icon">' + icon + '</span>' +
-      '<span class="grow-category-name">' + escapeHtml(item.category || 'Grow') + '</span>' +
+      '<span class="grow-category-name">' + escapeHtml(primaryCat || 'Grow') + '</span>' +
       '</div>';
   }
-  return '<article class="grow-card"' + dataAttr + ' data-category="' + escapeHtml(item.category || '') + '">' +
+  return '<article class="grow-card"' + dataAttr + ' data-category="' + escapeHtml(primaryCat || '') + '">' +
     '<a href="' + url + '" class="grow-card-link">' +
     '<div class="grow-card-image">' + BookmarkSystem.createButton(item.id, 'card') +
     imageHtml + '</div>' +
     '<div class="grow-card-content">' +
     '<div class="grow-card-meta">' +
-    '<span class="grow-card-category">' + icon + ' ' + escapeHtml(item.category || 'Grow') + '</span>' +
+    '<span class="grow-card-category">' + icon + ' ' + escapeHtml(primaryCat || 'Grow') + '</span>' +
     '<span class="reading-time">⏱️ ' + readingTime + ' min</span>' +
     '</div>' +
     '<h3 class="grow-card-title">' + escapeHtml(item.title) + '</h3>' +
@@ -912,20 +1030,21 @@ function createGrowCard(item) {
 }
 
 function createCreateCard(item) {
-  var cat = state.categories.create ? state.categories.create.find(function(c) { return c.name === item.category; }) : null;
+  var primaryCat = getPrimaryCategory(item);
+  var cat = state.categories.create ? state.categories.create.find(function(c) { return hasCategory(item, c.name); }) : null;
   var url = 'detail.html?id=' + item.id;
   var icon = cat ? cat.icon : '✨';
   var readingTime = calculateReadingTime(item.content);
-  var imageHtml = item.image 
+  var imageHtml = item.image
     ? '<img src="' + escapeHtml(item.image) + '" alt="' + escapeHtml(item.title) + '" class="create-card-img" loading="lazy">'
     : '<div class="create-card-placeholder"><span>' + icon + '</span></div>';
-  return '<article class="create-card" data-category="' + escapeHtml(item.category || '') + '">' +
+  return '<article class="create-card" data-category="' + escapeHtml(primaryCat || '') + '">' +
     '<a href="' + url + '" class="create-card-link">' +
     '<div class="create-card-image">' + BookmarkSystem.createButton(item.id, 'card') +
     imageHtml + '</div>' +
     '<div class="create-card-content">' +
     '<div class="create-card-meta">' +
-    '<span class="create-card-category">' + icon + ' ' + escapeHtml(item.category || 'Create') + '</span>' +
+    '<span class="create-card-category">' + icon + ' ' + escapeHtml(primaryCat || 'Create') + '</span>' +
     '<span class="reading-time">⏱️ ' + readingTime + ' min</span>' +
     '</div>' +
     '<h3 class="create-card-title">' + escapeHtml(item.title) + '</h3>' +
@@ -1035,8 +1154,9 @@ function renderDetailContent(item, type) {
 
   DownloadSystem.currentItem = item;
 
+  var primaryCat = getPrimaryCategory(item);
   var cats = type === 'inspire' ? state.categories.inspire : type === 'grow' ? state.categories.grow : state.categories.create;
-  var cat = cats ? cats.find(function(c) { return c.name === item.category; }) : null;
+  var cat = cats ? cats.find(function(c) { return hasCategory(item, c.name); }) : null;
   var icon = cat ? cat.icon : '📖';
 
   var processedContent = renderMarkdown(item.content || '');
@@ -1047,7 +1167,7 @@ function renderDetailContent(item, type) {
   var downloadAllBtn = DownloadSystem.createDownloadAllButton(item.images);
 
   // Check if this is Names of Allah category
-  var isAllahName = item.category === 'Names of Allah';
+  var isAllahName = hasCategory(item, 'Names of Allah');
   var headerHtml = '';
 
   if (isAllahName) {
@@ -1065,7 +1185,7 @@ function renderDetailContent(item, type) {
 
   el.innerHTML = '<article class="content-detail">' +
     headerHtml +
-    '<header class="content-header"><div class="content-meta"><span class="content-category">' + icon + ' ' + escapeHtml(item.category || 'Uncategorized') + '</span>' +
+    '<header class="content-header"><div class="content-meta"><span class="content-category">' + icon + ' ' + escapeHtml(primaryCat || 'Uncategorized') + '</span>' +
     (item.date ? '<span class="content-date">' + formatDate(item.date) + '</span>' : '') + '</div>' +
     (isAllahName ? '' : '<h1 class="content-title">' + escapeHtml(item.title) + '</h1>') +
     downloadAllBtn +
@@ -1082,8 +1202,12 @@ function renderRelatedContent(current, type) {
   if (!el) return;
   var items = type === 'inspire' ? state.inspire : type === 'grow' ? state.grow : state.create;
 
-  // Get items in same category
-  var sameCategory = items.filter(function(i) { return i.category === current.category; });
+  // Get items that share at least one category with current item
+  var currentCats = getCategories(current);
+  var sameCategory = items.filter(function(i) {
+    var itemCats = getCategories(i);
+    return currentCats.some(function(c) { return itemCats.indexOf(c) !== -1; });
+  });
   var currentIndex = sameCategory.findIndex(function(i) { return i.id === current.id; });
 
   // Get previous and next items
