@@ -23,6 +23,40 @@ function getPrimaryCategory(item) {
   return cats.length > 0 ? cats[0] : null;
 }
 
+// Shuffle an array (Fisher-Yates)
+function shuffleArray(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
+// Pick items from different categories, then fill remaining slots randomly
+function pickDiverse(items, count) {
+  if (items.length <= count) return shuffleArray(items);
+  var seen = {};
+  var picked = [];
+  var rest = [];
+  var shuffled = shuffleArray(items);
+  shuffled.forEach(function(item) {
+    var cat = getPrimaryCategory(item);
+    if (picked.length < count && cat && !seen[cat]) {
+      seen[cat] = true;
+      picked.push(item);
+    } else {
+      rest.push(item);
+    }
+  });
+  // Fill remaining slots from the rest
+  var i = 0;
+  while (picked.length < count && i < rest.length) {
+    picked.push(rest[i++]);
+  }
+  return picked;
+}
+
 // Get appropriate image based on current filter (for multi-category items)
 function getItemImage(item, categories) {
   if (!item) return null;
@@ -690,9 +724,9 @@ function getAllahNameFromContent(contentItem) {
 
 // Page Renderers
 function renderHomePage() {
-  renderSection('featured-inspire', state.inspire.slice(0, 3), createInspireCard);
-  renderSection('featured-grow', state.grow.slice(0, 3), createGrowCard);
-  renderSection('featured-create', state.create.slice(0, 3), createCreateCard);
+  renderSection('featured-inspire', pickDiverse(state.inspire, 3), createInspireCard);
+  renderSection('featured-grow', pickDiverse(state.grow, 3), createGrowCard);
+  renderSection('featured-create', pickDiverse(state.create, 3), createCreateCard);
   if (state.categories) {
     renderCategories('inspire-categories-grid', state.categories.inspire, state.inspire.length, 'inspire');
     renderCategories('grow-categories-grid', state.categories.grow, state.grow.length, 'grow');
@@ -1434,7 +1468,7 @@ function renderRelatedContent(current, type) {
   var excludeIds = [current.id];
   if (prevItem) excludeIds.push(prevItem.id);
   if (nextItem) excludeIds.push(nextItem.id);
-  var related = sameCategory.filter(function(i) { return excludeIds.indexOf(i.id) === -1; }).slice(0, 3);
+  var related = shuffleArray(sameCategory.filter(function(i) { return excludeIds.indexOf(i.id) === -1; })).slice(0, 3);
 
   var fn = type === 'inspire' ? createInspireCard : type === 'grow' ? createGrowCard : createCreateCard;
   var relatedHtml = related.length ? '<h3>More in ' + escapeHtml(current.category) + '</h3><div class="related-grid">' + related.map(fn).join('') + '</div>' : '';
