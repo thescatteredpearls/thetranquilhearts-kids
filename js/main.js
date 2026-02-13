@@ -140,6 +140,7 @@ function initializeFeatures() {
   initDarkMode();
   initFontSize();
   initMobileMenu();
+  initNavDropdowns();
 }
 
 // Load Components
@@ -1602,6 +1603,57 @@ function initMobileMenu() {
       menu.classList.toggle('open');
     });
   }
+}
+
+// Nav Dropdowns
+function initNavDropdowns() {
+  var sections = ['inspire', 'grow', 'create'];
+  sections.forEach(function(section) {
+    var menu = document.querySelector('.nav-dropdown-menu[data-section="' + section + '"]');
+    if (!menu || !state.categories[section]) return;
+
+    // "All" link at the top
+    var allLink = document.createElement('a');
+    allLink.href = section + '.html';
+    allLink.className = 'nav-dropdown-item';
+    allLink.innerHTML = '<span class="nav-dropdown-icon">📋</span> All';
+    menu.appendChild(allLink);
+
+    // Category links
+    state.categories[section].forEach(function(cat) {
+      var link = document.createElement('a');
+      link.href = section + '.html?category=' + cat.id;
+      link.className = 'nav-dropdown-item';
+      link.innerHTML = '<span class="nav-dropdown-icon">' + cat.icon + '</span> ' + cat.name;
+      menu.appendChild(link);
+    });
+  });
+
+  // Mobile: toggle dropdown on nav-link tap instead of navigating
+  var isMobile = window.matchMedia('(max-width: 768px)');
+
+  document.addEventListener('click', function(e) {
+    var navLink = e.target.closest('.nav-dropdown > .nav-link');
+    if (navLink && isMobile.matches) {
+      var dropdown = navLink.parentElement.querySelector('.nav-dropdown-menu');
+      if (dropdown) {
+        e.preventDefault();
+        // Close other dropdowns
+        document.querySelectorAll('.nav-dropdown-menu.open').forEach(function(d) {
+          if (d !== dropdown) d.classList.remove('open');
+        });
+        dropdown.classList.toggle('open');
+      }
+      return;
+    }
+
+    // Close dropdowns when clicking outside
+    if (!e.target.closest('.nav-dropdown')) {
+      document.querySelectorAll('.nav-dropdown-menu.open').forEach(function(d) {
+        d.classList.remove('open');
+      });
+    }
+  });
 }
 
 // Like System
