@@ -7,7 +7,7 @@ const SITE_CONFIG = {
   name: "The Tranquil Heart Kids",
   nameHtml: "The Tranquil Heart <span>Kids</span>",
   tagline: "Growing Hearts Growing Faith",
-  email: "geoffrin.j.11@gmail.com",
+  email: "thetranquilheartkids@gmail.com",
   year: new Date().getFullYear(),
   description: "Islamic stories, activities, and wisdom for children and families.",
 
