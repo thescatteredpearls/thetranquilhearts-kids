@@ -290,8 +290,8 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: 700; lin
 .inspire-card[data-category="Scientists"] { background: #F2F8F4; }
 .inspire-card[data-category="Scientists"] .inspire-card-placeholder { background: #D5E8DB; }
 
-.inspire-card[data-category="Inspiration"] { background: #f8f0f0; }
-.inspire-card[data-category="Inspiration"] .inspire-card-placeholder { background: #ffe4e4; }
+.inspire-card[data-category="Moral"] { background: #f8f0f0; }
+.inspire-card[data-category="Moral"] .inspire-card-placeholder { background: #ffe4e4; }
 
 /* GROW - Category Specific Colors */
 .grow-card[data-category="My Prayer"] { background: #F0F8F8; }

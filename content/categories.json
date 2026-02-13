@@ -4,8 +4,7 @@
     { "id": "seerah", "name": "Seerah", "icon": "🌙" },
     { "id": "companions", "name": "Companions", "icon": "⭐" },
     { "id": "scholars", "name": "Scholars", "icon": "🎓" },
-    { "id": "scientists", "name": "Scientists", "icon": "🪐" },
-    { "id": "inspiration", "name": "Inspiration", "icon": "💫" }
+    { "id": "scientists", "name": "Scientists", "icon": "🪐" }
   ],
   "grow": [
     { "id": "myprayer", "name": "My Prayer", "icon": "🤲" },
@@ -17,8 +16,6 @@
   ],
   "create": [
     { "id": "habit", "name": "Habit", "icon": "📋" },
-    { "id": "activities", "name": "Activities", "icon": "🌈" },
-    { "id": "bookmarks", "name": "Bookmarks", "icon": "🔖" },
-    { "id": "reminders", "name": "Reminders", "icon": "🔔" }
+    { "id": "activities", "name": "Activities", "icon": "🌈" }
   ]
 }
