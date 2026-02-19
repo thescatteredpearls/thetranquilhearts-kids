@@ -319,6 +319,72 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: 700; lin
 .create-card[data-category="Bookmarks"] { background: #FFFCF0; }
 .create-card[data-category="Bookmarks"] .create-card-placeholder { background: #FFF5C8; }
 
+/* Dark Mode Card Overrides */
+.dark-mode .inspire-card,
+.dark-mode .grow-card,
+.dark-mode .create-card { background: #2D3748; }
+
+.dark-mode .inspire-card[data-category="Prophets"] { background: #3B2A2A; }
+.dark-mode .inspire-card[data-category="Prophets"] .inspire-card-placeholder { background: #4A3030; }
+
+.dark-mode .inspire-card[data-category="Seerah"] { background: #2A3B2A; }
+.dark-mode .inspire-card[data-category="Seerah"] .inspire-card-placeholder { background: #3A3028; }
+
+.dark-mode .inspire-card[data-category="Companions"] { background: #2A3538; }
+.dark-mode .inspire-card[data-category="Companions"] .inspire-card-placeholder { background: #1E3838; }
+
+.dark-mode .inspire-card[data-category="Scholars"] { background: #2A3040; }
+.dark-mode .inspire-card[data-category="Scholars"] .inspire-card-placeholder { background: #253548; }
+
+.dark-mode .inspire-card[data-category="Scientists"] { background: #2A3830; }
+.dark-mode .inspire-card[data-category="Scientists"] .inspire-card-placeholder { background: #253828; }
+
+.dark-mode .inspire-card[data-category="Moral"] { background: #3B2A2A; }
+.dark-mode .inspire-card[data-category="Moral"] .inspire-card-placeholder { background: #4A2828; }
+
+.dark-mode .grow-card[data-category="My Prayer"] { background: #2A3538; }
+.dark-mode .grow-card[data-category="My Prayer"] .grow-card-placeholder { background: #1E3838; }
+
+.dark-mode .grow-card[data-category="Daily Sunnah"] { background: #3B3525; }
+.dark-mode .grow-card[data-category="Daily Sunnah"] .grow-card-placeholder { background: #4A3E1E; }
+
+.dark-mode .grow-card[data-category="Names of Allah"] { background: #2A3538; }
+.dark-mode .grow-card[data-category="Names of Allah"] .grow-card-placeholder { background: linear-gradient(135deg, #2A3838 0%, #253535 30%, #352A35 70%, #382A2A 100%); }
+
+.dark-mode .grow-card[data-category="Adhkar"] { background: #2A3040; }
+.dark-mode .grow-card[data-category="Adhkar"] .grow-card-placeholder { background: #253548; }
+
+.dark-mode .grow-card[data-category="Gifts"] { background: #3B2828; }
+.dark-mode .grow-card[data-category="Gifts"] .grow-card-placeholder { background: #4A2525; }
+
+.dark-mode .grow-card[data-category="Faith"] { background: #2A3040; }
+.dark-mode .grow-card[data-category="Faith"] .grow-card-placeholder { background: #253548; }
+
+.dark-mode .create-card[data-category="Activities"] { background: #382A30; }
+.dark-mode .create-card[data-category="Activities"] .create-card-placeholder { background: #452535; }
+
+.dark-mode .create-card[data-category="Habit"] { background: #2A3830; }
+.dark-mode .create-card[data-category="Habit"] .create-card-placeholder { background: #253828; }
+
+.dark-mode .create-card[data-category="Bookmarks"] { background: #383525; }
+.dark-mode .create-card[data-category="Bookmarks"] .create-card-placeholder { background: #4A4520; }
+
+.dark-mode .inspire-card-content,
+.dark-mode .grow-card-content,
+.dark-mode .create-card-content { color: var(--color-text); }
+
+.dark-mode .inspire-card-excerpt,
+.dark-mode .grow-card-excerpt,
+.dark-mode .create-card-excerpt { color: var(--color-text-light); }
+
+.dark-mode .inspire-card-footer,
+.dark-mode .grow-card-footer,
+.dark-mode .create-card-footer { border-top-color: var(--color-border); }
+
+.dark-mode .inspire-card-image,
+.dark-mode .grow-card-image,
+.dark-mode .create-card-image { background: var(--color-bg-alt); }
+
 /* Card Links */
 .inspire-card-link, .grow-card-link, .create-card-link { display: flex; flex-direction: column; flex: 1; color: inherit; text-decoration: none; }
 

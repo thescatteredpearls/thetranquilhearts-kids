@@ -1,5 +1,6 @@
 // THE TRANQUIL HEART KIDS - Main JavaScript (Enhanced with Download Functionality)
 var state = { inspire: [], grow: [], create: [], categories: { inspire: [], grow: [], create: [] }, currentFilter: 'all' };
+var shuffledCache = { inspire: null, grow: null, create: null };
 const DATA_SOURCES = {
   inspire: 'data/inspire.json',
   grow: 'data/grow.json',
@@ -924,6 +925,7 @@ function filterGrow(id) { applyFilter(id); currentPage.grow = 1; renderFilteredG
 function filterCreate(id) { applyFilter(id); currentPage.create = 1; renderFilteredCreate(); }
 
 function applyFilter(id) {
+  if (id === 'all') { shuffledCache = { inspire: null, grow: null, create: null }; }
   state.currentFilter = id;
   var url = new URL(window.location);
   if (id === 'all') url.searchParams.delete('category');
@@ -939,22 +941,38 @@ var itemsPerPage = 12;
 var currentPage = { inspire: 1, grow: 1, create: 1 };
 
 function renderFilteredInspire() {
-  var items = getFiltered(state.inspire, state.categories.inspire);
+  var items = getFiltered(state.inspire, state.categories.inspire, 'inspire');
   renderPaginated(items, 'inspire-list-container', createInspireCard, 'inspire', 'goToInspirePage');
 }
 
 function renderFilteredGrow() {
-  var items = getFiltered(state.grow, state.categories.grow);
+  var items = getFiltered(state.grow, state.categories.grow, 'grow');
   renderPaginated(items, 'grow-list-container', createGrowCard, 'grow', 'goToGrowPage');
 }
 
 function renderFilteredCreate() {
-  var items = getFiltered(state.create, state.categories.create);
+  var items = getFiltered(state.create, state.categories.create, 'create');
   renderPaginated(items, 'create-list-container', createCreateCard, 'create', 'goToCreatePage');
 }
 
-function getFiltered(items, cats) {
-  if (state.currentFilter === 'all') return items;
+function shuffleArray(arr) {
+  var shuffled = arr.slice();
+  for (var i = shuffled.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = shuffled[i];
+    shuffled[i] = shuffled[j];
+    shuffled[j] = temp;
+  }
+  return shuffled;
+}
+
+function getFiltered(items, cats, type) {
+  if (state.currentFilter === 'all') {
+    if (!shuffledCache[type] || shuffledCache[type].length !== items.length) {
+      shuffledCache[type] = shuffleArray(items);
+    }
+    return shuffledCache[type];
+  }
   var cat = cats ? cats.find(function(c) { return c.id === state.currentFilter; }) : null;
   if (cat) return items.filter(function(i) { return hasCategory(i, cat.name); });
   return items;
@@ -1915,6 +1933,7 @@ function renderMarkdown(t) {
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
     .replace(/^- (.+)$/gm, '<li>$1</li>')
     .replace(/\n\n/g, '</p><p>');
 }
