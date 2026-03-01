@@ -492,6 +492,94 @@
   z-index: 2;
 }
 
+/* Collect badge CTA */
+.badge-collect-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 0;
+  position: relative;
+  z-index: 2;
+}
+
+.badge-cta-teaser {
+  font-size: 1.1rem;
+  color: #8B6914;
+  margin: 0;
+}
+
+.badge-cta-teaser strong {
+  color: #5C4033;
+}
+
+.btn-collect-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 40px;
+  background: linear-gradient(135deg, #DAA520 0%, #F0C040 50%, #DAA520 100%);
+  color: #3D2B00;
+  font-size: 1.25rem;
+  font-weight: 800;
+  font-family: var(--font-heading, sans-serif);
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(218, 165, 32, 0.5), 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  letter-spacing: 0.5px;
+}
+
+.btn-collect-badge:hover {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 10px 32px rgba(218, 165, 32, 0.6), 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-collect-badge:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Download badge button */
+.btn-download-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 12px 32px;
+  background: #5C4033;
+  color: #FFF8E7;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: var(--font-heading, sans-serif);
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(92, 64, 51, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.btn-download-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(92, 64, 51, 0.4);
+}
+
+/* Dark mode */
+.dark-mode .badge-cta-teaser {
+  color: #DAA520;
+}
+
+.dark-mode .badge-cta-teaser strong {
+  color: #FFD700;
+}
+
+.dark-mode .btn-download-badge {
+  background: #8B6914;
+  color: #FFF8E7;
+}
+
 /* Dark mode support */
 .dark-mode .allah-name-badge-section {
   background: linear-gradient(135deg, #2D2A1F 0%, #3D3825 50%, #2A2617 100%);

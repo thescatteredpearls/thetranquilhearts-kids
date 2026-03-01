@@ -1352,12 +1352,24 @@ var BadgeSystem = {
   createBadgeHtml: function(allahName) {
     if (!allahName) return '';
 
+    this._pendingName = allahName;
+    var subtitle = allahName.transliteration === 'Allah'
+      ? 'This is the most powerful name of Allah'
+      : 'One of the most Beautiful Names of Allah';
+
     return '<div class="allah-name-badge-section">' +
-      '<h3 class="badge-section-title">✨ You Learned About ✨</h3>' +
-      '<div class="allah-name-badge-container">' +
-        '<canvas id="allah-name-badge" width="300" height="300"></canvas>' +
+      '<div class="badge-collect-cta" id="badge-collect-cta">' +
+        '<p class="badge-cta-teaser">You learned about <strong>' + allahName.transliteration + '</strong>!</p>' +
+        '<button class="btn-collect-badge" onclick="BadgeSystem.revealBadge()">🏅 Collect Your Badge</button>' +
       '</div>' +
-      '<p class="badge-section-subtitle">One of the most Beautiful Names of Allah</p>' +
+      '<div class="badge-reveal-section" id="badge-reveal-section" style="display:none">' +
+        '<h3 class="badge-section-title">✨ You Learned About ✨</h3>' +
+        '<div class="allah-name-badge-container">' +
+          '<canvas id="allah-name-badge" width="300" height="300"></canvas>' +
+        '</div>' +
+        '<p class="badge-section-subtitle">' + subtitle + '</p>' +
+        '<button class="btn-download-badge" onclick="BadgeSystem.downloadBadge()">⬇ Download Your Badge</button>' +
+      '</div>' +
     '</div>';
   },
 
@@ -1367,6 +1379,25 @@ var BadgeSystem = {
     if (canvas && allahName) {
       this.generateBadge(canvas, allahName, size || 300);
     }
+  },
+
+  // Reveal badge on button click
+  revealBadge: function() {
+    var cta = document.getElementById('badge-collect-cta');
+    var reveal = document.getElementById('badge-reveal-section');
+    if (cta) cta.style.display = 'none';
+    if (reveal) reveal.style.display = 'block';
+    this.renderBadge(this._pendingName, 300);
+  },
+
+  // Download the badge as PNG
+  downloadBadge: function() {
+    var canvas = document.getElementById('allah-name-badge');
+    if (!canvas) return;
+    var link = document.createElement('a');
+    link.download = (this._pendingName ? this._pendingName.transliteration : 'badge') + '-badge.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
   }
 };
 
@@ -1437,12 +1468,7 @@ function renderDetailContent(item, type) {
     BookmarkSystem.createButton(item.id) + LikeSystem.createButton(item.id) + ShareSystem.createButton(item.title, window.location.href) +
     '</div><a href="' + type + '.html" class="btn btn-back">← Back to ' + type.charAt(0).toUpperCase() + type.slice(1) + '</a></footer></article>';
 
-  // Render the badge canvas after DOM is updated
-  if (isAllahName && allahName) {
-    setTimeout(function() {
-      BadgeSystem.renderBadge(allahName, 300);
-    }, 100);
-  }
+  // Badge is rendered on demand when user clicks "Collect Your Badge"
 }
 
 function renderRelatedContent(current, type) {
